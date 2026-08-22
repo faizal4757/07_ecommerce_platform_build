@@ -4,8 +4,12 @@
 
 **Checkpoint:** 2 (in progress)
 **Phase:** Terraform + Unity Catalog Infrastructure
-**Status:** Terraform project directory confirmed; Databricks authentication pending
-**Last completed step:** Created and confirmed the `terraform/` project directory
+**Status:** Terraform provider initialized and validated; Databricks connectivity test pending
+**Last completed step:** Initialized and validated the Databricks Terraform provider
+
+> **Project standard:** This is a learning project built with production-grade
+> repository practices. Changes are documented, validated, committed on a
+> focused branch, and reviewed through a pull request before they reach `main`.
 
 ---
 
@@ -965,6 +969,9 @@ Terraform v1.15.9 available in this shell        ✅
 Git main branch clean before this checkpoint      ✅
 Git origin configured                             ✅
 .env ignored and not tracked                      ✅
+Provider configuration created                    ✅
+terraform init completed                          ✅
+terraform validate completed                      ✅
 ```
 
 ## Authentication decision
@@ -983,15 +990,24 @@ credentials instead of a personal token.
 
 ## Current blocker
 
-The workspace URL and a Databricks PAT have not yet been supplied or configured
-locally. Do not create provider `.tf` files or run `terraform init` until those
-connection details are available.
+The environment variables `DATABRICKS_HOST` and `DATABRICKS_TOKEN` were not
+detected in the local `.env` file during the setup check. Their values are never
+read, printed, or committed. The provider configuration is initialized, but an
+authenticated connectivity test cannot run until both variables are available to
+the Terraform process.
 
 ## Next action
 
-Add the workspace URL and PAT to the local `.env` file. Then create the first
-provider configuration, run `terraform init`, and perform a read-only
-connectivity test.
+Add `DATABRICKS_HOST` and `DATABRICKS_TOKEN` to the local `.env` file, then
+ensure they are loaded into the shell that runs Terraform. The next command will
+be a read-only Terraform connectivity test; it will not create or modify a
+Databricks resource.
+
+## Git and pull-request workflow
+
+From Checkpoint 2 onward, every completed checkpoint uses one focused branch and
+one commit. That branch is pushed for the project owner to create and review a
+pull request. Direct commits or pushes to `main` are not part of the workflow.
 
 ---
 
