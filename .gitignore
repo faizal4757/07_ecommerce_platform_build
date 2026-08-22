@@ -2,3 +2,10 @@
 .venv/
 /project_content/
 /secrets/
+
+# Terraform local working files and state (never commit credentials or state).
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log

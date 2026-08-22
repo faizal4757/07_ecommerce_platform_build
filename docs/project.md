@@ -2,10 +2,10 @@
 
 ## Project Checkpoint
 
-**Checkpoint:** 1
+**Checkpoint:** 2 (in progress)
 **Phase:** Terraform + Unity Catalog Infrastructure
-**Status:** Terraform installed and ready
-**Last completed step:** Terraform installation and PATH configuration
+**Status:** Terraform project directory confirmed; Databricks authentication pending
+**Last completed step:** Created and confirmed the `terraform/` project directory
 
 ---
 
@@ -952,6 +952,46 @@ Actual State
 ```
 
 and determining what changes are required.
+
+---
+
+# 25. Checkpoint 2 Progress Log
+
+## Completed
+
+```text
+terraform/ directory created and confirmed       ✅
+Terraform v1.15.9 available in this shell        ✅
+Git main branch clean before this checkpoint      ✅
+Git origin configured                             ✅
+.env ignored and not tracked                      ✅
+```
+
+## Authentication decision
+
+For the first Terraform-to-Databricks connectivity test, use a Databricks
+personal access token (PAT) stored locally in `.env`:
+
+```text
+DATABRICKS_HOST=https://<workspace-url>
+DATABRICKS_TOKEN=<personal-access-token>
+```
+
+This is the simplest way to learn and verify the provider connection. For
+production CI/CD, move to a Databricks service principal with OAuth
+credentials instead of a personal token.
+
+## Current blocker
+
+The workspace URL and a Databricks PAT have not yet been supplied or configured
+locally. Do not create provider `.tf` files or run `terraform init` until those
+connection details are available.
+
+## Next action
+
+Add the workspace URL and PAT to the local `.env` file. Then create the first
+provider configuration, run `terraform init`, and perform a read-only
+connectivity test.
 
 ---
 
