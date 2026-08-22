@@ -16,8 +16,9 @@ Databricks state and proposes the changes needed to reconcile them.
 
 ## Learning-project authentication
 
-The first connection will use a Databricks personal access token (PAT). Keep the
-workspace URL and PAT only in the local `.env` file, which Git ignores:
+This learning project uses a Databricks personal access token (PAT) for local
+Terraform authentication. Keep the workspace URL and PAT only in the local
+`.env` file, which Git ignores:
 
 ```dotenv
 DATABRICKS_HOST=https://<your-workspace-url>
@@ -40,14 +41,43 @@ is not.
 
 It does not create, change, or delete any Databricks resources.
 
+## Implemented provider and catalog baseline
+
+The Terraform configuration is initialized with the locked
+`databricks/databricks` provider and passes `terraform validate`. Terraform has
+successfully applied the following catalog resources:
+
+| Environment | Catalog | Managed storage root |
+| --- | --- | --- |
+| Development | `01_ecommerce_dev` | `s3://ecommerce-pipeline-faizal-dev/catalogue/01_ecommerce_dev` |
+| Staging | `02_ecommerce_stg` | `s3://ecommerce-pipeline-faizal-dev/catalogue/02_ecommerce_stg` |
+| Production | `03_ecommerce_prod` | `s3://ecommerce-pipeline-faizal-dev/catalogue/03_ecommerce_prod` |
+
+The catalog names deliberately encode both ordering and environment. Each has
+Terraform properties for `environment`, `project = ecommerce`, and
+`managed_by = terraform`.
+
 ## Planned sequence
 
-1. Configure `DATABRICKS_HOST` and `DATABRICKS_TOKEN` locally.
-2. Add a provider-only Terraform configuration. **Completed.**
+1. Configure `DATABRICKS_HOST` and `DATABRICKS_TOKEN` locally. **Completed.**
+2. Add provider configuration. **Completed.**
 3. Run `terraform init` and `terraform validate`. **Completed.**
-4. Run a read-only Terraform connectivity test.
-5. Import the manually created `ecommerce` catalog before Terraform manages it.
-6. Add Terraform-managed `bronze`, `silver`, and `gold` schemas.
+4. Create and apply the dev, staging, and production catalogs. **Completed.**
+5. Add Terraform-managed `bronze`, `silver`, and `gold` schemas to each catalog.
+6. Add storage credentials, external locations, and least-privilege grants.
+7. Add remote Terraform state and CI/CD before collaborative deployments.
+
+## State and production considerations
+
+The current Terraform state is local and ignored by Git, which is appropriate
+for this single-developer learning checkpoint. A production implementation must
+use encrypted remote state with locking and controlled access before multiple
+people or CI/CD can apply infrastructure changes.
+
+The current catalog `storage_root` values are managed-storage roots. They are
+not replacements for governed raw-data access. When S3 raw-data ingestion is
+implemented, use a Unity Catalog storage credential and external location with
+least-privilege permissions rather than embedding cloud credentials in code.
 
 ## Change management
 

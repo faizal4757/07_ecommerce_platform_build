@@ -2,10 +2,10 @@
 
 ## Project Checkpoint
 
-**Checkpoint:** 2 (in progress)
+**Checkpoint:** 2 (completed)
 **Phase:** Terraform + Unity Catalog Infrastructure
-**Status:** Terraform provider initialized and validated; Databricks connectivity test pending
-**Last completed step:** Initialized and validated the Databricks Terraform provider
+**Status:** Three environment-specific Unity Catalog catalogs are managed by Terraform
+**Last completed step:** Created and applied the development, staging, and production catalogs
 
 > **Project standard:** This is a learning project built with production-grade
 > repository practices. Changes are documented, validated, committed on a
@@ -1008,6 +1008,67 @@ Databricks resource.
 From Checkpoint 2 onward, every completed checkpoint uses one focused branch and
 one commit. That branch is pushed for the project owner to create and review a
 pull request. Direct commits or pushes to `main` are not part of the workflow.
+
+---
+
+## Checkpoint 2 Completion Update (Authoritative)
+
+This update supersedes the older, forward-looking Checkpoint 2 and `NEXT TASK`
+notes above. They are retained as a learning record of the original plan.
+
+### Verified current state
+
+The Terraform configuration is valid, and local Terraform state contains three
+applied `databricks_catalog` resources:
+
+| Environment | Terraform resource | Unity Catalog | Managed storage root |
+| --- | --- | --- | --- |
+| Development | `catalog_01_ecommerce_dev` | `01_ecommerce_dev` | `s3://ecommerce-pipeline-faizal-dev/catalogue/01_ecommerce_dev` |
+| Staging | `catalog_02_ecommerce_stg` | `02_ecommerce_stg` | `s3://ecommerce-pipeline-faizal-dev/catalogue/02_ecommerce_stg` |
+| Production | `catalog_03_ecommerce_prod` | `03_ecommerce_prod` | `s3://ecommerce-pipeline-faizal-dev/catalogue/03_ecommerce_prod` |
+
+The provider configuration contains no credentials; local Databricks
+authentication is supplied through ignored environment variables. The catalog
+configuration also labels every catalog with its environment, project, and
+Terraform ownership.
+
+### Architecture clarification
+
+The implemented catalog boundary is now environment-first, not a single
+`ecommerce` catalog:
+
+```text
+01_ecommerce_dev
+02_ecommerce_stg
+03_ecommerce_prod
+```
+
+The medallion layer remains the schema boundary inside each catalog:
+
+```text
+<environment_catalog>.bronze
+<environment_catalog>.silver
+<environment_catalog>.gold
+```
+
+For example, a development bronze orders table will be named
+`01_ecommerce_dev.bronze.orders`. This prevents development and staging
+workloads from writing to the production catalog while retaining an identical
+data-layer structure in each environment.
+
+### Checkpoint 3: Next task
+
+Add Terraform-managed `bronze`, `silver`, and `gold` schemas to each existing
+catalog. Keep this as a schema-only change: format, validate, plan, and review
+it through a pull request before applying it.
+
+### Production maturity note
+
+Local, ignored Terraform state is suitable for this individual learning stage.
+Before collaborative deployments or CI/CD, migrate to encrypted remote state
+with locking, controlled access, and auditable deployment credentials. Add
+Unity Catalog storage credentials, external locations, and least-privilege
+grants before ingesting S3 data.
 
 ---
 
