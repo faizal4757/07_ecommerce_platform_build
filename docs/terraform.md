@@ -1,5 +1,10 @@
 # Terraform and Databricks
 
+> **Learning project, production discipline.** We use this project to understand
+> Terraform and Unity Catalog step by step while applying production practices:
+> no secrets in code, explicit version constraints, committed dependency locks,
+> validation before deployment, and pull-request review.
+
 ## Purpose
 
 Terraform is the infrastructure-as-code tool for this project. Its Databricks
@@ -38,11 +43,18 @@ It does not create, change, or delete any Databricks resources.
 ## Planned sequence
 
 1. Configure `DATABRICKS_HOST` and `DATABRICKS_TOKEN` locally.
-2. Add a provider-only Terraform configuration.
-3. Run `terraform init` and `terraform validate`.
+2. Add a provider-only Terraform configuration. **Completed.**
+3. Run `terraform init` and `terraform validate`. **Completed.**
 4. Run a read-only Terraform connectivity test.
 5. Import the manually created `ecommerce` catalog before Terraform manages it.
 6. Add Terraform-managed `bronze`, `silver`, and `gold` schemas.
+
+## Change management
+
+Terraform changes are made on a dedicated branch, documented in the project
+journal, validated locally, and submitted through a pull request. The project
+owner creates and merges the pull request; automated work never writes directly
+to `main`.
 
 ## References
 
