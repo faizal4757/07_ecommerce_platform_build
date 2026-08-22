@@ -1,0 +1,4 @@
+.env
+.venv/
+/project_content/
+/secrets/
