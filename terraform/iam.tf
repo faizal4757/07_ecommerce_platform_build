@@ -9,7 +9,10 @@ resource "aws_iam_role" "databricks_olist_access" {
         Effect = "Allow"
 
         Principal = {
-          AWS = "arn:aws:iam::414351767826:role/unity-catalog-prod-UCMasterRole-14S5ZJVKOTYTL"
+          AWS = [
+            "arn:aws:iam::414351767826:role/unity-catalog-prod-UCMasterRole-14S5ZJVKOTYTL",
+            "arn:aws:iam::702127848749:role/databricks-olist-access"
+          ]
         }
 
         Action = "sts:AssumeRole"
@@ -33,6 +36,7 @@ resource "aws_iam_role" "databricks_olist_access" {
 
 resource "aws_iam_role_policy" "databricks_olist_s3" {
   name = "databricks-olist-s3-access"
+
   role = aws_iam_role.databricks_olist_access.id
 
   policy = jsonencode({
@@ -48,6 +52,13 @@ resource "aws_iam_role_policy" "databricks_olist_s3" {
           aws_s3_bucket.olist_data.arn,
           "${aws_s3_bucket.olist_data.arn}/*"
         ]
+      },
+      {
+        Effect = "Allow"
+
+        Action = "sts:AssumeRole"
+
+        Resource = aws_iam_role.databricks_olist_access.arn
       }
     ]
   })
