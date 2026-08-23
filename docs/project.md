@@ -1,1100 +1,270 @@
-# ecommerce-data-platform
+# Ecommerce Data Platform
 
-## Project Checkpoint
+> **Hands-on learning project with production discipline.** This repository
+> progressively builds one coherent ecommerce data platform while practicing the
+> engineering standards used in production: infrastructure as code, secure
+> configuration, validation, feature branches, pull requests, and documented
+> architecture decisions.
 
-**Checkpoint:** 3 (completed)
-**Phase:** Terraform + Unity Catalog Infrastructure
-**Status:** Environment-specific catalogs and medallion schemas are managed by Terraform
-**Last completed step:** Created and applied bronze, silver, and gold schemas in every environment
+## 1. Project overview
 
-> **Project standard:** This is a learning project built with production-grade
-> repository practices. Changes are documented, validated, committed on a
-> focused branch, and reviewed through a pull request before they reach `main`.
+The project is an AWS and Databricks ecommerce data platform. Its common domain
+is the **Olist Brazilian E-Commerce dataset**. The goal is not to assemble
+disconnected tutorials: every skill is learned by evolving the same platform.
 
----
+## 2. Project objective
 
-# 1. Project Goal
+Build a governed pipeline that will ingest Olist raw data from Amazon S3 into
+Databricks, process it through bronze, silver, and gold layers, and make it
+available for analytics. Infrastructure and governance are established before
+data ingestion.
 
-Build a realistic production-style **Ecommerce Data Engineering Platform** using:
+## 3. Current status
 
-* AWS S3
-* Databricks
-* Unity Catalog
-* PySpark
-* Terraform
-* dbt
-* Databricks Asset Bundles (DAB)
-* Git
-* CI/CD
+**Checkpoint:** 4 — Governed S3 Access
 
-The goal is not only to build the pipeline, but to understand **why each component exists, how they interact, and how the same architecture would be managed in production.**
+**Current state:** Checkpoints 1 through 4A are complete. Terraform manages the
+current AWS and Databricks infrastructure. Checkpoint 4B, S3 security
+configuration, is the next implementation task.
 
----
+**Important:** The Olist data has not been downloaded or uploaded. No ingestion
+pipeline, Delta table, dbt model, Databricks job, or CI/CD pipeline exists yet.
 
-# 2. Target Architecture
+## 4. Completed checkpoints
 
-The intended high-level architecture is:
+| Checkpoint | Status | Evidence |
+| --- | --- | --- |
+| 1. Terraform setup | Completed | Terraform 1.15.9 is installed and available on the local PATH. |
+| 2. Databricks catalogs | Completed | Terraform manages development, staging, and production Unity Catalog catalogs. |
+| 3. Medallion schemas | Completed | Terraform manages bronze, silver, and gold schemas in every catalog. |
+| 4A. S3 foundation | Completed | Terraform manages the dedicated, currently empty Olist S3 bucket. |
+
+## 5. Current checkpoint: Governed S3 Access
+
+Checkpoint 4 establishes safe, governed access between AWS S3 and Databricks.
+
+| Stage | Status | Scope |
+| --- | --- | --- |
+| 4A | Completed | AWS provider and dedicated Olist S3 bucket. |
+| 4B | Planned — next | S3 public-access blocking, encryption, versioning, and tags. |
+| 4C | Planned | IAM roles, trust policies, and least-privilege permissions. |
+| 4D | Planned | Unity Catalog storage credential. |
+| 4E | Planned | Unity Catalog external location. |
+| 4F | Planned | Least-privilege Unity Catalog grants. |
+| 4G | Planned | Validate governed Databricks-to-S3 access. |
+
+Only after 4G is complete should the project acquire Olist data, upload it to
+the governed raw-data location, and begin ingestion.
+
+## 6. Current Terraform architecture
+
+The Terraform configuration is intentionally simple and root-level. Do not add
+modules or refactor this layout during the current learning stage. An earlier
+Databricks module experiment was abandoned and is not current architecture.
 
 ```text
-                         ecommerce-data-platform
-                                  |
-                 +----------------+----------------+
-                 |                                 |
-                AWS                            Databricks
-                 |                                 |
-                S3                            Unity Catalog
-                 |                                 |
-             Raw Data                     ecommerce Catalog
-                 |                                 |
-                 |                     +-----------+-----------+
-                 |                     |           |           |
-                 |                  bronze      silver       gold
-                 |                     |           |           |
-                 |                     |          dbt         dbt
-                 |                     |           |           |
-                 +---------------------+-----------+-----------+
-                                       |
-                                  Analytics / BI
+terraform/
+├── .terraform/                 Local provider cache (ignored)
+├── .terraform.lock.hcl         Committed provider dependency lock
+├── aws_s3.tf                   Olist S3 bucket
+├── catalog.tf                  Databricks catalogs
+├── providers.tf                AWS and Databricks provider configuration
+├── schemas.tf                  Medallion schemas
+├── versions.tf                 Terraform and provider constraints
+└── local Terraform state files (ignored)
 ```
 
-More specifically:
+Terraform requires version `>= 1.15.0, < 2.0.0`. The Databricks provider is
+constrained to `~> 1.0`, and the AWS provider to `~> 6.0`. The AWS region is
+`us-east-1`. Databricks credentials are supplied locally through unified
+authentication; secrets never belong in Terraform source files.
+
+## 7. Current infrastructure inventory
+
+Terraform local state contains **13 managed resources**.
+
+| Platform | Resources | Current state |
+| --- | --- | --- |
+| AWS | `aws_s3_bucket.olist_data` | Bucket `olist-data-platform-faizal`; empty; no Olist data loaded. |
+| Databricks | 3 catalogs | `01_ecommerce_dev`, `02_ecommerce_stg`, `03_ecommerce_prod`. |
+| Databricks | 9 schemas | Bronze, silver, and gold schemas in each environment catalog. |
+
+The catalog managed-storage roots are currently:
 
 ```text
-S3 Raw Data
+s3://ecommerce-pipeline-faizal-dev/catalogue/01_ecommerce_dev
+s3://ecommerce-pipeline-faizal-dev/catalogue/02_ecommerce_stg
+s3://ecommerce-pipeline-faizal-dev/catalogue/03_ecommerce_prod
+```
+
+The environment-first namespace keeps development and staging workloads
+separate from production. The medallion layer is represented by schemas, for
+example `01_ecommerce_dev.bronze` and `03_ecommerce_prod.gold`.
+
+## 8. Immediate next steps
+
+1. Configure S3 public-access blocking.
+2. Enable S3 server-side encryption.
+3. Enable S3 versioning.
+4. Add consistent S3 tags.
+5. Run `terraform fmt`, `terraform validate`, and `terraform plan` before a
+   pull request.
+
+## 9. Olist dataset and domain
+
+The Olist Brazilian E-Commerce dataset is the planned source domain. It will
+provide the ecommerce entities needed for later ingestion, transformations, and
+analytics. Its acquisition and upload are deliberately deferred until S3 and
+Databricks access are governed.
+
+## 10. Target architecture
+
+This is the **target architecture**, not the current implementation.
+
+```text
+Git / GitHub
     |
-    | PySpark / Auto Loader
-    v
-Bronze
+Feature branches and pull requests
     |
-    | dbt
-    v
-Silver
+CI/CD
     |
-    | dbt
-    v
-Gold
-```
-
----
-
-# 3. Unity Catalog Hierarchy
-
-The core Unity Catalog hierarchy we are using is:
-
-```text
-Catalog
-   |
-   +-- Schema
-         |
-         +-- Table
-         +-- View
-         +-- Function
-```
-
-For this project:
-
-```text
-ecommerce                    <-- Catalog
-|
-+-- bronze                   <-- Schema
-|
-+-- silver                   <-- Schema
-|
-+-- gold                     <-- Schema
-```
-
-Tables will eventually look like:
-
-```text
-ecommerce.bronze.orders
-ecommerce.silver.orders
-ecommerce.gold.daily_sales
-```
-
-The three-level namespace is:
-
-```text
-catalog.schema.object
-```
-
----
-
-# 4. Current Databricks State
-
-The `ecommerce` catalog has already been created manually through the Databricks UI.
-
-Current state:
-
-```text
-Unity Catalog
-|
-+-- ecommerce
-      |
-      +-- default
-      |
-      +-- information_schema
-```
-
-The following schemas have **not yet been created**:
-
-```text
-ecommerce.bronze
-ecommerce.silver
-ecommerce.gold
-```
-
-These will eventually be created using Terraform as part of the infrastructure-as-code exercise.
-
----
-
-# 5. Unity Catalog Concepts Already Covered
-
-## Catalog
-
-A catalog is the top-level namespace in Unity Catalog.
-
-Example:
-
-```text
-ecommerce
-```
-
-## Schema
-
-A schema organizes tables, views, functions, etc.
-
-Example:
-
-```text
-ecommerce.bronze
-```
-
-## Table
-
-A table contains structured data.
-
-Example:
-
-```text
-ecommerce.bronze.orders
-```
-
-## View
-
-A view stores a query definition rather than being an independent copy of the underlying dataset.
-
-## Volume
-
-A Volume is used for governing files that are not necessarily tables.
-
-Examples:
-
-```text
-JSON
-CSV
-PDF
-images
-other files
-```
-
-## External Location
-
-An External Location represents and governs access to an external cloud-storage location such as an S3 path.
-
-Example:
-
-```text
-s3://company-data/raw/
-```
-
-## Storage Credential
-
-A Storage Credential represents the authentication/authorization mechanism used to access external cloud storage.
-
-Conceptually:
-
-```text
-Databricks
-    |
-Storage Credential
-    |
-AWS IAM
-    |
-S3
-```
-
-## Connection
-
-A Unity Catalog Connection represents connectivity to an external system such as a database or service.
-
----
-
-# 6. Catalog Types Covered
-
-We discussed the major catalog types shown in the Databricks UI.
-
-## Standard Catalog
-
-Normal Unity Catalog catalog used for Databricks-managed analytical data.
-
-Example:
-
-```text
-ecommerce
-```
-
-## Foreign Catalog
-
-Represents an external database/catalog.
-
-Examples:
-
-```text
-PostgreSQL
-MySQL
-SQL Server
-```
-
-The data remains in the external system.
-
-## Shared Catalog
-
-Represents data shared through mechanisms such as Delta Sharing.
-
-The recipient does not necessarily own the underlying data.
-
-## Lakebase Postgres Catalog
-
-Represents Databricks Lakebase/PostgreSQL data and is oriented more toward application/transactional workloads.
-
----
-
-# 7. Managed vs External Storage
-
-This distinction is extremely important.
-
-## Managed Table
-
-Unity Catalog manages the table's underlying storage and lifecycle.
-
-Conceptually:
-
-```text
-Unity Catalog
-    |
-Catalog
-    |
-Managed Table
-    |
-Managed Storage Location
-    |
-S3
-```
-
-## External Table
-
-The data already exists at a storage location controlled outside the table lifecycle.
-
-Example:
-
-```text
-S3
-|
-+-- raw/
-     |
-     +-- orders/
-```
-
-Unity Catalog registers and governs the data without taking ownership of its underlying lifecycle in the same way as a managed table.
-
----
-
-# 8. Catalog Managed Storage
-
-A catalog can have a managed storage location.
-
-Conceptually:
-
-```text
-ecommerce
-    |
-    +-- Managed Storage Location
-             |
-             v
-       s3://.../ecommerce/
-```
-
-When a managed table is created under that catalog, Databricks can store the table's underlying files in that managed storage area.
-
-Important:
-
-**The catalog itself does not contain the physical table rows.**
-
-The actual data remains in cloud object storage such as S3.
-
----
-
-# 9. Important S3 Duplication Concept
-
-Our source data is already in S3.
-
-Conceptually:
-
-```text
-S3
-|
-+-- raw/
-     |
-     +-- orders.csv
-```
-
-If we read that file and create a new managed Delta table:
-
-```text
-S3
-|
-+-- raw/
-|    |
-|    +-- orders.csv
-|
-+-- managed/
-     |
-     +-- ecommerce/
-          |
-          +-- managed Delta table files
-```
-
-then there can be two physical datasets.
-
-This is not caused simply by creating a catalog.
-
-The duplication happens because we:
-
-```text
-read source data
-      |
-      v
-write another dataset
-```
-
-This is often intentional in a medallion architecture.
-
----
-
-# 10. Intended Medallion Architecture
-
-The intended pipeline is:
-
-```text
-S3 Raw
-   |
-   v
-Bronze
-   |
-   v
-Silver
-   |
-   v
-Gold
-```
-
-Bronze:
-
-* Raw/near-raw ingested data
-* Primarily ingestion responsibility
-* PySpark / Auto Loader or similar technology
-
-Silver:
-
-* Cleaned
-* Validated
-* Standardized
-* Transformed
-* dbt can manage transformations
-
-Gold:
-
-* Business-ready
-* Aggregated
-* Analytics-oriented
-* dbt can manage transformations
-
----
-
-# 11. dbt Role
-
-dbt is primarily being used for **data transformation**, not initial raw ingestion.
-
-Conceptual flow:
-
-```text
-Bronze
-   |
-   | dbt
-   v
-Silver
-   |
-   | dbt
-   v
-Gold
-```
-
-A dbt model might look like:
-
-```sql
-SELECT
-    order_id,
-    customer_id,
-    product_id,
-    quantity,
-    unit_price
-FROM {{ ref('stg_orders') }}
-```
-
-dbt compiles the model's SQL and then materializes the result in Databricks according to the model configuration.
-
-Important distinction:
-
-```text
-Schema != dbt Model
-```
-
-For example:
-
-```text
-ecommerce.silver
-```
-
-is a schema.
-
-```text
-orders.sql
-```
-
-can be a dbt model.
-
-The dbt model may eventually materialize as:
-
-```text
-ecommerce.silver.orders
-```
-
----
-
-# 12. Terraform Role
-
-Terraform will be used to manage infrastructure and governance declaratively.
-
-Expected responsibilities include things such as:
-
-```text
 Terraform
-|
-+-- Catalog
-+-- Schemas
-+-- Storage Credentials
-+-- External Locations
-+-- Permissions
-+-- Other infrastructure/configuration
+   / \
+ AWS   Databricks
+  |       |
+ S3   Unity Catalog
+  |       |
+  |   Storage credential
+  |       |
+  |   External location
+  |       |
+  +-------+
+      |
+  Olist raw data
+      |
+  Batch / streaming ingestion
+      |
+    Bronze
+      |
+  PySpark / Delta
+      |
+    Silver
+      |
+  PySpark / dbt
+      |
+     Gold
+      |
+ Analytics / BI
 ```
 
-Instead of manually doing:
-
-```sql
-CREATE SCHEMA ecommerce.bronze;
-```
-
-in production, we can define the desired infrastructure as code.
-
-Conceptually:
+## 11. Data engineering learning roadmap
 
 ```text
-Git
- |
-Terraform
- |
-Databricks
- |
-Unity Catalog
- |
-ecommerce.bronze
+Infrastructure → Governance → Raw data → Batch ingestion → Bronze → Silver
+→ Gold → Data quality → Incremental processing → Streaming → CDC
+→ Schema evolution → Spark optimization → dbt → Orchestration → CI/CD
+→ Production-oriented deployment
 ```
 
----
+## 12. Skill progress tracker
 
-# 13. DAB Role
+| Skill | Status |
+| --- | --- |
+| Terraform fundamentals | In Progress |
+| AWS S3 foundation | In Progress |
+| AWS IAM | Planned |
+| Unity Catalog catalogs and schemas | In Progress |
+| Storage credentials and external locations | Planned |
+| Bronze / Silver / Gold structure | In Progress |
+| Batch ingestion | Planned |
+| Incremental ingestion / Auto Loader | Planned |
+| Streaming / CDC / schema evolution | Planned |
+| Delta Lake | Planned |
+| PySpark | Planned |
+| Spark optimization | Planned |
+| dbt and data quality | Planned |
+| Databricks Jobs / Asset Bundles | Planned |
+| Airflow | Planned |
+| Docker | Planned |
+| CI/CD | Planned |
+| Git / pull-request workflow | In Progress |
 
-Databricks Asset Bundles (DAB) will be considered for deployment of Databricks project assets.
-
-Potential responsibilities:
+## 13. Git and pull-request workflow
 
 ```text
-DAB
-|
-+-- Databricks Jobs
-+-- Python code
-+-- Notebooks
-+-- SQL
-+-- Pipelines
-+-- Job configuration
-+-- Deployment configuration
+main
+  |
+feature branch
+  |
+implementation
+  |
+terraform fmt / validate / plan
+  |
+commit and push
+  |
+pull request
+  |
+review and merge
+  |
+delete feature branch
 ```
 
-DAB and Terraform are not necessarily mutually exclusive.
+The project owner reviews and merges pull requests. Do not directly develop on
+`main`.
 
-The exact division depends on the organization's production platform standards.
+## 14. Validation and deployment workflow
 
----
+For every Terraform infrastructure change:
 
-# 14. Tool Responsibilities
+1. Format with `terraform fmt`.
+2. Validate syntax with `terraform validate`.
+3. Inspect the proposed change with `terraform plan`.
+4. Commit only reviewed source and dependency-lock changes—never secrets or
+   local state.
+5. Submit a pull request and apply only after review and approval.
 
-Current mental model:
+`terraform validate` currently passes. Terraform state is local and ignored by
+Git, which is acceptable only for this single-developer learning stage.
+
+## 15. Production-oriented practices
+
+- Keep secrets out of source control and Terraform configuration.
+- Use least-privilege IAM and Unity Catalog grants.
+- Block public S3 access and use encryption and versioning.
+- Use pull-request review and repeatable Terraform validation.
+- Before team use or CI/CD, migrate from local state to encrypted remote state
+  with locking and controlled access.
+
+## 16. Architecture decisions
+
+| Decision | Rationale |
+| --- | --- |
+| Root-level Terraform configuration | Keeps the early learning architecture transparent and inspectable. |
+| Three environment catalogs | Separates development, staging, and production workloads. |
+| Medallion schemas per catalog | Applies a consistent bronze/silver/gold topology in every environment. |
+| Olist as the common domain | Lets each learning stage build on the same ecommerce platform. |
+| Governance before ingestion | Prevents ungoverned access patterns from becoming part of the platform. |
+
+## 17. Future data flow
 
 ```text
-Terraform
-    |
-    +-- Infrastructure / governance
-    |
-    +-- Catalogs
-    +-- Schemas
-    +-- Storage
-    +-- Permissions
-
-
-DAB
-    |
-    +-- Databricks application assets
-    |
-    +-- Jobs
-    +-- Python code
-    +-- Notebooks
-    +-- Pipelines
-
-
-PySpark / Auto Loader
-    |
-    +-- Ingestion
-    +-- Processing
-    +-- Bronze
-
-
-dbt
-    |
-    +-- Transformations
-    +-- Silver
-    +-- Gold
-    +-- Tests
-    +-- Documentation
-
-
-Git / CI/CD
-    |
-    +-- Version control
-    +-- Pull requests
-    +-- Testing
-    +-- Deployment
+Governed Olist files in S3
+    → Databricks ingestion
+    → bronze raw Delta tables
+    → silver cleaned and standardized tables
+    → gold business-ready models
+    → analytics and BI
 ```
 
----
+This flow is planned; no dataset or pipeline has been implemented yet.
 
-# 15. Terraform Installation Status
+## 18. Definition of success
 
-Terraform is installed locally on Windows.
+The project succeeds when it provides a reproducible, governed ecommerce
+platform that demonstrates secure cloud access, reliable ingestion,
+well-modeled bronze/silver/gold data, data quality, orchestration, deployment
+automation, and clear documentation of the engineering decisions made.
 
-Terraform executable:
+## Immediate Next Action
 
-```text
-C:\Terraform\terraform.exe
-```
-
-Architecture:
-
-```text
-windows_amd64
-```
-
-Terraform version:
-
-```text
-Terraform v1.15.9
-```
-
-The `C:\Terraform` directory has been added to the Windows PATH.
-
-The following command now works from a fresh CMD window:
-
-```cmd
-terraform --version
-```
-
-Expected output:
-
-```text
-Terraform v1.15.9
-on windows_amd64
-```
-
----
-
-# 16. Terraform Status
-
-Completed:
-
-```text
-Terraform executable              ✅
-Correct AMD64 version             ✅
-C:\Terraform                      ✅
-Windows PATH                      ✅
-terraform --version               ✅
-```
-
-Not yet completed:
-
-```text
-Terraform project directory       ⏳
-Terraform configuration            ⏳
-Databricks provider                ⏳
-Databricks authentication          ⏳
-terraform init                     ⏳
-Terraform -> Databricks test       ⏳
-Catalog via Terraform              ⏳
-Schemas via Terraform              ⏳
-Storage configuration              ⏳
-Permissions                        ⏳
-```
-
----
-
-# 17. Current Project Repository
-
-The intended project name is:
-
-```text
-ecommerce-data-platform
-```
-
-The repository will eventually evolve toward something like:
-
-```text
-ecommerce-data-platform/
-|
-+-- terraform/
-|
-+-- databricks/
-|
-+-- src/
-|    |
-|    +-- ingestion/
-|
-+-- dbt/
-|
-+-- tests/
-|
-+-- docs/
-|
-+-- resources/
-|
-+-- databricks.yml
-|
-+-- README.md
-|
-+-- .gitignore
-```
-
-This structure is **not fully created yet**.
-
-Do not assume every directory above already exists.
-
----
-
-# 18. S3 Status
-
-An ecommerce source dataset already exists in S3.
-
-Known conceptual structure:
-
-```text
-S3
-|
-+-- raw/
-     |
-     +-- orders/
-```
-
-Exact bucket name and complete path should be verified before being placed into Terraform configuration.
-
-Potential future structure:
-
-```text
-S3
-|
-+-- raw/
-|
-+-- managed/
-     |
-     +-- ecommerce/
-          |
-          +-- bronze/
-          +-- silver/
-          +-- gold/
-```
-
-This is an architectural target, not necessarily the current physical S3 structure.
-
----
-
-# 19. Production SDLC Mental Model
-
-The intended production workflow is:
-
-```text
-Developer
-   |
-   v
-Git branch
-   |
-   v
-Code changes
-   |
-   v
-Pull Request
-   |
-   v
-CI tests
-   |
-   v
-Merge
-   |
-   +-------------------+
-   |                   |
-   v                   v
-Terraform             dbt / DAB
-   |                   |
-   v                   v
-Infrastructure       Data / Jobs
-   |                   |
-   +---------+---------+
-             |
-             v
-        Databricks
-```
-
-The goal is to avoid relying on manual UI changes in production.
-
-The Databricks UI remains extremely useful for:
-
-* Learning
-* Debugging
-* Exploration
-* Inspecting execution
-* Understanding how resources behave
-
-But production changes should generally be represented as code and deployed through controlled processes.
-
----
-
-# 20. Current Learning Strategy
-
-We are deliberately building the platform incrementally.
-
-Do not jump directly into a complete production architecture.
-
-The learning sequence is:
-
-```text
-1. Understand Databricks UI
-        |
-        v
-2. Understand Unity Catalog
-        |
-        v
-3. Terraform
-        |
-        v
-4. Create infrastructure through Terraform
-        |
-        v
-5. Ingestion
-        |
-        v
-6. Bronze
-        |
-        v
-7. dbt
-        |
-        v
-8. Silver
-        |
-        v
-9. Gold
-        |
-        v
-10. DAB
-        |
-        v
-11. CI/CD
-```
-
-The reason is to understand what the automation is actually automating.
-
----
-
-# 21. Current Checkpoint
-
-## Completed
-
-```text
-Databricks / Unity Catalog concepts     ✅
-ecommerce catalog created               ✅
-Terraform installed                     ✅
-Terraform PATH configured               ✅
-terraform --version works               ✅
-```
-
-## Current stopping point
-
-Terraform is installed, but it has **not yet been connected to Databricks**.
-
----
-
-# 22. NEXT TASK
-
-## Checkpoint 2: Create Terraform Project
-
-First create:
-
-```text
-ecommerce-data-platform/
-|
-+-- terraform/
-```
-
-Then configure the Databricks Terraform provider.
-
-The intended flow is:
-
-```text
-Local Machine
-     |
-     v
-Terraform Project
-     |
-     v
-Databricks Provider
-     |
-     v
-Authentication
-     |
-     v
-Databricks Workspace
-```
-
-Only after Terraform can successfully communicate with Databricks should we create the `ecommerce` catalog and its schemas through Terraform.
-
----
-
-# 23. Immediate Next Action
-
-From the desired project location:
-
-```cmd
-mkdir ecommerce-data-platform
-cd ecommerce-data-platform
-mkdir terraform
-cd terraform
-```
-
-Then verify the working directory.
-
-**Do not create the `.tf` files until the project directory is confirmed.**
-
-The next discussion should explain:
-
-1. What the Databricks Terraform provider is
-2. How Terraform authenticates to Databricks
-3. Which authentication method we should use for this learning project
-4. What `terraform init` actually does
-5. Then create the first Terraform configuration
-
----
-
-# 24. Important Rule for Continuing This Project
-
-Do not assume that a resource exists merely because it appears in the target architecture.
-
-Always distinguish:
-
-```text
-CURRENT STATE
-```
-
-from:
-
-```text
-TARGET STATE
-```
-
-For example:
-
-```text
-CURRENT:
-ecommerce catalog exists
-
-TARGET:
-ecommerce
-├── bronze
-├── silver
-└── gold
-```
-
-This distinction is important because Terraform works by comparing:
-
-```text
-Desired State
-      vs
-Actual State
-```
-
-and determining what changes are required.
-
----
-
-# 25. Checkpoint 2 Progress Log
-
-## Completed
-
-```text
-terraform/ directory created and confirmed       ✅
-Terraform v1.15.9 available in this shell        ✅
-Git main branch clean before this checkpoint      ✅
-Git origin configured                             ✅
-.env ignored and not tracked                      ✅
-Provider configuration created                    ✅
-terraform init completed                          ✅
-terraform validate completed                      ✅
-```
-
-## Authentication decision
-
-For the first Terraform-to-Databricks connectivity test, use a Databricks
-personal access token (PAT) stored locally in `.env`:
-
-```text
-DATABRICKS_HOST=https://<workspace-url>
-DATABRICKS_TOKEN=<personal-access-token>
-```
-
-This is the simplest way to learn and verify the provider connection. For
-production CI/CD, move to a Databricks service principal with OAuth
-credentials instead of a personal token.
-
-## Current blocker
-
-The environment variables `DATABRICKS_HOST` and `DATABRICKS_TOKEN` were not
-detected in the local `.env` file during the setup check. Their values are never
-read, printed, or committed. The provider configuration is initialized, but an
-authenticated connectivity test cannot run until both variables are available to
-the Terraform process.
-
-## Next action
-
-Add `DATABRICKS_HOST` and `DATABRICKS_TOKEN` to the local `.env` file, then
-ensure they are loaded into the shell that runs Terraform. The next command will
-be a read-only Terraform connectivity test; it will not create or modify a
-Databricks resource.
-
-## Git and pull-request workflow
-
-From Checkpoint 2 onward, every completed checkpoint uses one focused branch and
-one commit. That branch is pushed for the project owner to create and review a
-pull request. Direct commits or pushes to `main` are not part of the workflow.
-
----
-
-## Checkpoint 2 Completion Update (Authoritative)
-
-This update supersedes the older, forward-looking Checkpoint 2 and `NEXT TASK`
-notes above. They are retained as a learning record of the original plan.
-
-### Verified current state
-
-The Terraform configuration is valid, and local Terraform state contains three
-applied `databricks_catalog` resources:
-
-| Environment | Terraform resource | Unity Catalog | Managed storage root |
-| --- | --- | --- | --- |
-| Development | `catalog_01_ecommerce_dev` | `01_ecommerce_dev` | `s3://ecommerce-pipeline-faizal-dev/catalogue/01_ecommerce_dev` |
-| Staging | `catalog_02_ecommerce_stg` | `02_ecommerce_stg` | `s3://ecommerce-pipeline-faizal-dev/catalogue/02_ecommerce_stg` |
-| Production | `catalog_03_ecommerce_prod` | `03_ecommerce_prod` | `s3://ecommerce-pipeline-faizal-dev/catalogue/03_ecommerce_prod` |
-
-The provider configuration contains no credentials; local Databricks
-authentication is supplied through ignored environment variables. The catalog
-configuration also labels every catalog with its environment, project, and
-Terraform ownership.
-
-### Architecture clarification
-
-The implemented catalog boundary is now environment-first, not a single
-`ecommerce` catalog:
-
-```text
-01_ecommerce_dev
-02_ecommerce_stg
-03_ecommerce_prod
-```
-
-The medallion layer remains the schema boundary inside each catalog:
-
-```text
-<environment_catalog>.bronze
-<environment_catalog>.silver
-<environment_catalog>.gold
-```
-
-For example, a development bronze orders table will be named
-`01_ecommerce_dev.bronze.orders`. This prevents development and staging
-workloads from writing to the production catalog while retaining an identical
-data-layer structure in each environment.
-
-### Checkpoint 3 Completion: Medallion Schemas
-
-Terraform now manages all nine medallion schemas with the
-`databricks_schema.medallion` resource and a `for_each` map. This keeps the
-schema definition concise while making every catalog-to-schema assignment
-explicit in the configuration.
-
-```text
-01_ecommerce_dev.bronze
-01_ecommerce_dev.silver
-01_ecommerce_dev.gold
-
-02_ecommerce_stg.bronze
-02_ecommerce_stg.silver
-02_ecommerce_stg.gold
-
-03_ecommerce_prod.bronze
-03_ecommerce_prod.silver
-03_ecommerce_prod.gold
-```
-
-The local Terraform state now contains 12 managed resources: three catalogs and
-nine schemas. `terraform validate` completes successfully.
-
-### Checkpoint 4: Next task
-
-Design governed S3 data access before ingestion. The next infrastructure change
-should introduce a Unity Catalog storage credential, an external location for
-raw data, and least-privilege grants. Do not embed AWS credentials in Terraform
-configuration or Databricks objects.
-
-### Production maturity note
-
-Local, ignored Terraform state is suitable for this individual learning stage.
-Before collaborative deployments or CI/CD, migrate to encrypted remote state
-with locking, controlled access, and auditable deployment credentials. Add
-Unity Catalog storage credentials, external locations, and least-privilege
-grants before ingesting S3 data.
-
----
-
-# END OF CHECKPOINT
+S3 security configuration
