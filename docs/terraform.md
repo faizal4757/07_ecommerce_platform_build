@@ -57,13 +57,30 @@ The catalog names deliberately encode both ordering and environment. Each has
 Terraform properties for `environment`, `project = ecommerce`, and
 `managed_by = terraform`.
 
+## Implemented medallion schema baseline
+
+The three-layer medallion structure is now deployed in every catalog. A local
+`schemas` map defines the catalog and schema name for each environment/layer
+combination, and `databricks_schema.medallion` uses `for_each` to create the
+nine schema resources. The result is consistent, environment-isolated names:
+
+| Environment | Schemas |
+| --- | --- |
+| Development | `01_ecommerce_dev.bronze`, `.silver`, `.gold` |
+| Staging | `02_ecommerce_stg.bronze`, `.silver`, `.gold` |
+| Production | `03_ecommerce_prod.bronze`, `.silver`, `.gold` |
+
+This is a useful production pattern when environments share the same topology:
+the declarative map is easy to review, avoids nine repetitive resource blocks,
+and keeps Terraform resource addresses stable through their map keys.
+
 ## Planned sequence
 
 1. Configure `DATABRICKS_HOST` and `DATABRICKS_TOKEN` locally. **Completed.**
 2. Add provider configuration. **Completed.**
 3. Run `terraform init` and `terraform validate`. **Completed.**
 4. Create and apply the dev, staging, and production catalogs. **Completed.**
-5. Add Terraform-managed `bronze`, `silver`, and `gold` schemas to each catalog.
+5. Add Terraform-managed `bronze`, `silver`, and `gold` schemas to each catalog. **Completed.**
 6. Add storage credentials, external locations, and least-privilege grants.
 7. Add remote Terraform state and CI/CD before collaborative deployments.
 
@@ -78,6 +95,10 @@ The current catalog `storage_root` values are managed-storage roots. They are
 not replacements for governed raw-data access. When S3 raw-data ingestion is
 implemented, use a Unity Catalog storage credential and external location with
 least-privilege permissions rather than embedding cloud credentials in code.
+
+The current local state represents 12 Terraform-managed resources: three
+catalogs and nine schemas. Before a team or CI/CD applies further changes,
+migrate this state to a remote backend and agree the state-access model.
 
 ## Change management
 

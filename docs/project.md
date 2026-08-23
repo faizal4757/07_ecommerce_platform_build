@@ -2,10 +2,10 @@
 
 ## Project Checkpoint
 
-**Checkpoint:** 2 (completed)
+**Checkpoint:** 3 (completed)
 **Phase:** Terraform + Unity Catalog Infrastructure
-**Status:** Three environment-specific Unity Catalog catalogs are managed by Terraform
-**Last completed step:** Created and applied the development, staging, and production catalogs
+**Status:** Environment-specific catalogs and medallion schemas are managed by Terraform
+**Last completed step:** Created and applied bronze, silver, and gold schemas in every environment
 
 > **Project standard:** This is a learning project built with production-grade
 > repository practices. Changes are documented, validated, committed on a
@@ -1056,11 +1056,36 @@ For example, a development bronze orders table will be named
 workloads from writing to the production catalog while retaining an identical
 data-layer structure in each environment.
 
-### Checkpoint 3: Next task
+### Checkpoint 3 Completion: Medallion Schemas
 
-Add Terraform-managed `bronze`, `silver`, and `gold` schemas to each existing
-catalog. Keep this as a schema-only change: format, validate, plan, and review
-it through a pull request before applying it.
+Terraform now manages all nine medallion schemas with the
+`databricks_schema.medallion` resource and a `for_each` map. This keeps the
+schema definition concise while making every catalog-to-schema assignment
+explicit in the configuration.
+
+```text
+01_ecommerce_dev.bronze
+01_ecommerce_dev.silver
+01_ecommerce_dev.gold
+
+02_ecommerce_stg.bronze
+02_ecommerce_stg.silver
+02_ecommerce_stg.gold
+
+03_ecommerce_prod.bronze
+03_ecommerce_prod.silver
+03_ecommerce_prod.gold
+```
+
+The local Terraform state now contains 12 managed resources: three catalogs and
+nine schemas. `terraform validate` completes successfully.
+
+### Checkpoint 4: Next task
+
+Design governed S3 data access before ingestion. The next infrastructure change
+should introduce a Unity Catalog storage credential, an external location for
+raw data, and least-privilege grants. Do not embed AWS credentials in Terraform
+configuration or Databricks objects.
 
 ### Production maturity note
 
