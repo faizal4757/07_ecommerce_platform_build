@@ -3,6 +3,9 @@
 /project_content/
 /secrets/
 
+
+/data/
+
 # Terraform local working files and state (never commit credentials or state).
 **/.terraform/*
 *.tfstate
