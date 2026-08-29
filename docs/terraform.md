@@ -1,114 +1,61 @@
 # Terraform and Databricks
 
-> **Learning project, production discipline.** We use this project to understand
-> Terraform and Unity Catalog step by step while applying production practices:
-> no secrets in code, explicit version constraints, committed dependency locks,
-> validation before deployment, and pull-request review.
+Terraform manages the root-level AWS S3 and IAM resources alongside Databricks
+Unity Catalog resources. This simple layout is intentional for the current
+learning stage; it does not use Terraform modules.
 
-## Purpose
+## Authentication and validation
 
-Terraform is the infrastructure-as-code tool for this project. Its Databricks
-provider calls Databricks APIs so Unity Catalog infrastructure can be described,
-reviewed, and deployed from version-controlled files.
-
-Terraform will manage the desired state. It compares that state with the actual
-Databricks state and proposes the changes needed to reconcile them.
-
-## Learning-project authentication
-
-This learning project uses a Databricks personal access token (PAT) for local
-Terraform authentication. Keep the workspace URL and PAT only in the local
-`.env` file, which Git ignores:
+Databricks uses unified authentication from the local, ignored `.env` file:
 
 ```dotenv
 DATABRICKS_HOST=https://<your-workspace-url>
 DATABRICKS_TOKEN=<your-personal-access-token>
 ```
 
-The provider automatically recognizes these unified-authentication environment
-variables. The Terraform configuration therefore contains no secret values.
+AWS uses the normal local credential chain in `us-east-1`; neither provider's
+credentials belong in Terraform source. Terraform requires `>= 1.15.0, < 2.0.0`.
+The locked providers are `databricks/databricks ~> 1.0` and
+`hashicorp/aws ~> 6.0`.
 
-For production automation, use a service principal with OAuth credentials rather
-than a developer's personal token.
+From `terraform/`, run `terraform init`, `terraform fmt`,
+`terraform validate`, and `terraform plan` before an infrastructure change.
+`terraform validate` currently passes. A plan requires live cloud credentials
+and must be reviewed before applying.
 
-## What `terraform init` does
+## Managed infrastructure
 
-`terraform init` prepares one Terraform working directory. In this project it
-will download the pinned Databricks provider into the ignored `.terraform/`
-directory and create/update `.terraform.lock.hcl` with the selected provider
-version and checksums. The lock file is committed; the `.terraform/` directory
-is not.
+Local state currently tracks 25 resources.
 
-It does not create, change, or delete any Databricks resources.
-
-## Implemented provider and catalog baseline
-
-The Terraform configuration is initialized with the locked
-`databricks/databricks` provider and passes `terraform validate`. Terraform has
-successfully applied the following catalog resources:
-
-| Environment | Catalog | Managed storage root |
-| --- | --- | --- |
-| Development | `01_ecommerce_dev` | `s3://ecommerce-pipeline-faizal-dev/catalogue/01_ecommerce_dev` |
-| Staging | `02_ecommerce_stg` | `s3://ecommerce-pipeline-faizal-dev/catalogue/02_ecommerce_stg` |
-| Production | `03_ecommerce_prod` | `s3://ecommerce-pipeline-faizal-dev/catalogue/03_ecommerce_prod` |
-
-The catalog names deliberately encode both ordering and environment. Each has
-Terraform properties for `environment`, `project = ecommerce`, and
-`managed_by = terraform`.
-
-## Implemented medallion schema baseline
-
-The three-layer medallion structure is now deployed in every catalog. A local
-`schemas` map defines the catalog and schema name for each environment/layer
-combination, and `databricks_schema.medallion` uses `for_each` to create the
-nine schema resources. The result is consistent, environment-isolated names:
-
-| Environment | Schemas |
+| Area | Resources |
 | --- | --- |
-| Development | `01_ecommerce_dev.bronze`, `.silver`, `.gold` |
-| Staging | `02_ecommerce_stg.bronze`, `.silver`, `.gold` |
-| Production | `03_ecommerce_prod.bronze`, `.silver`, `.gold` |
+| S3 | Raw-data and Databricks-managed-storage buckets, each with public-access blocking, AES-256 default encryption, and versioning |
+| IAM | `databricks-olist-access` role and its S3 access policy |
+| Unity Catalog | One storage credential and two external locations |
+| Catalogs | `01_ecommerce_dev`, `02_ecommerce_stg`, `03_ecommerce_prod` |
+| Schemas | `bronze`, `silver`, and `gold` in each catalog (nine schemas) |
 
-This is a useful production pattern when environments share the same topology:
-the declarative map is easy to review, avoids nine repetitive resource blocks,
-and keeps Terraform resource addresses stable through their map keys.
+The buckets are `olist-data-platform-raw` and
+`olist-data-platform-databricks`. External locations point to
+`s3://olist-data-platform-raw/raw/` and
+`s3://olist-data-platform-databricks/catalogue/`.
 
-## Planned sequence
+## Current checkpoint and next work
 
-1. Configure `DATABRICKS_HOST` and `DATABRICKS_TOKEN` locally. **Completed.**
-2. Add provider configuration. **Completed.**
-3. Run `terraform init` and `terraform validate`. **Completed.**
-4. Create and apply the dev, staging, and production catalogs. **Completed.**
-5. Add Terraform-managed `bronze`, `silver`, and `gold` schemas to each catalog. **Completed.**
-6. Add storage credentials, external locations, and least-privilege grants.
-7. Add remote Terraform state and CI/CD before collaborative deployments.
+Checkpoint 4 (Governed S3 Access) has completed its S3 foundation and security,
+IAM role/policy, Unity Catalog storage credential, and external-location work.
+Next, define least-privilege Unity Catalog grants, review and narrow the current
+broad IAM S3 policy where appropriate, then validate Databricks-to-S3 access.
+The Olist dataset has not been loaded and no ingestion pipeline exists.
 
 ## State and production considerations
 
-The current Terraform state is local and ignored by Git, which is appropriate
-for this single-developer learning checkpoint. A production implementation must
-use encrypted remote state with locking and controlled access before multiple
-people or CI/CD can apply infrastructure changes.
-
-The current catalog `storage_root` values are managed-storage roots. They are
-not replacements for governed raw-data access. When S3 raw-data ingestion is
-implemented, use a Unity Catalog storage credential and external location with
-least-privilege permissions rather than embedding cloud credentials in code.
-
-The current local state represents 12 Terraform-managed resources: three
-catalogs and nine schemas. Before a team or CI/CD applies further changes,
-migrate this state to a remote backend and agree the state-access model.
-
-## Change management
-
-Terraform changes are made on a dedicated branch, documented in the project
-journal, validated locally, and submitted through a pull request. The project
-owner creates and merges the pull request; automated work never writes directly
-to `main`.
+State is local and ignored by Git, suitable only for this single-developer
+learning stage. Before team use or CI/CD applies, migrate to encrypted remote
+state with locking and controlled access. Do not commit `.env`, state files,
+`.terraform/`, or cloud credentials.
 
 ## References
 
 - [Databricks Terraform provider documentation](https://docs.databricks.com/aws/en/dev-tools/terraform/)
 - [Databricks unified authentication environment variables](https://docs.databricks.com/aws/en/dev-tools/auth/env-vars)
-- [Databricks personal access token authentication](https://docs.databricks.com/aws/en/dev-tools/auth/pat)

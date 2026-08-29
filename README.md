@@ -1,10 +1,7 @@
 # Ecommerce Data Platform
 
-> **Learning project with production-grade engineering practices.** This
-> repository is a hands-on implementation of an ecommerce data platform. It is
-> intentionally built incrementally to make each architectural decision
-> understandable, while using the review, security, and deployment conventions
-> expected of a production data platform.
+> A hands-on learning project that applies production-minded engineering
+> practices while building one coherent ecommerce data platform.
 
 ## Architecture
 
@@ -12,53 +9,50 @@
 AWS S3 raw data -> Databricks Bronze -> Silver -> Gold -> Analytics / BI
 ```
 
-Terraform manages Databricks and Unity Catalog infrastructure. PySpark handles
-ingestion, dbt handles transformations, and Databricks Asset Bundles will
-package Databricks jobs and related assets.
+Terraform currently manages the AWS and Databricks governance foundation.
+PySpark ingestion, Delta tables, dbt transformations, jobs, and BI are planned
+later stages.
 
 ## Current status
 
-Checkpoint 2 is in progress: the Terraform project and Databricks provider are
-initialized and validated before any Unity Catalog resources are managed as
-code. The authenticated workspace connectivity test remains pending. See [the
-project journal](docs/project.md) for the authoritative current state and [the
-Terraform guide](docs/terraform.md) for setup details.
+Checkpoint 4, **Governed S3 Access**, is in progress. Terraform has created two
+protected S3 buckets, the Databricks IAM role and storage credential, and two
+Unity Catalog external locations. Unity Catalog grants and an end-to-end
+Databricks-to-S3 access validation remain before any Olist data is loaded.
 
-## Engineering principles
-
-- Keep credentials, Terraform state, and generated files out of version control.
-- Make infrastructure changes declarative, reviewable, and reproducible.
-- Distinguish the current environment from the intended architecture.
-- Validate changes before deployment and document decisions as they are made.
-- Use pull requests for every completed learning checkpoint.
+See the [project journal](docs/project.md) for the authoritative checkpoint and
+roadmap, and the [Terraform guide](docs/terraform.md) for infrastructure
+details.
 
 ## Repository layout
 
 ```text
-terraform/       Databricks and Unity Catalog infrastructure as code
-src/             Ingestion and processing code
+terraform/       AWS and Databricks infrastructure as code
+src/             Future ingestion and processing code
 notebooks/       Exploratory and learning notebooks
-data/            Local sample data only; source data remains in S3
+data/            Local sample data only; ignored by Git
 tests/           Automated tests
 docs/            Architecture, checkpoint journal, and operating guides
 ```
 
 ## Local setup
 
-1. Copy the required local credentials into the ignored `.env` file:
+1. Put local Databricks credentials in the ignored `.env` file:
 
    ```dotenv
    DATABRICKS_HOST=https://<your-workspace-url>
    DATABRICKS_TOKEN=<your-personal-access-token>
    ```
 
-2. Load these variables into your shell without committing them.
-3. From `terraform/`, run `terraform init` and `terraform validate`.
+2. Load those variables into your shell without committing them.
+3. From `terraform/`, run `terraform init`, `terraform fmt`,
+   `terraform validate`, and `terraform plan`.
 
-Do not place secrets in `.tf`, `.tfvars`, Markdown, commits, or pull requests.
+Do not put secrets, Terraform state, generated files, or Olist source data in
+Git.
 
 ## Contribution workflow
 
-Each checkpoint is developed on a focused branch and delivered as one commit.
-The branch is pushed for a user-created pull request; `main` changes only after
-that PR is reviewed and merged. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Develop each checkpoint on a focused branch, validate it, and submit it as a
+pull request. The project owner reviews and merges changes; `main` is not a
+direct development branch. See [CONTRIBUTING.md](CONTRIBUTING.md).
