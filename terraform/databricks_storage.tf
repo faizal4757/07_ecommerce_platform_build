@@ -7,5 +7,5 @@ resource "databricks_storage_credential" "olist_s3" {
 
   comment = "Storage credential for Olist S3 data platform managed by Terraform"
 
-  skip_validation = true
+
 }

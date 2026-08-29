@@ -1,11 +1,17 @@
 variable "aws_account_id" {
-  description = "AWS account ID used by this learning project."
+  description = "AWS account ID used by this  project."
   type        = string
   default     = "702127848749"
 }
 
-variable "olist_bucket_name" {
-  description = "S3 bucket used by the Olist data platform."
+variable "raw_bucket_name" {
+  description = "S3 bucket containing raw Olist source data."
   type        = string
-  default     = "olist-data-platform-faizal"
+  default     = "olist-data-platform-raw"
+}
+
+variable "databricks_bucket_name" {
+  description = "S3 bucket used for Databricks-managed storage."
+  type        = string
+  default     = "olist-data-platform-databricks"
 }

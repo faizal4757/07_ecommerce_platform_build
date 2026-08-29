@@ -49,8 +49,10 @@ resource "aws_iam_role_policy" "databricks_olist_s3" {
         Action = "s3:*"
 
         Resource = [
-          aws_s3_bucket.olist_data.arn,
-          "${aws_s3_bucket.olist_data.arn}/*"
+          aws_s3_bucket.raw_data.arn,
+          "${aws_s3_bucket.raw_data.arn}/*",
+          aws_s3_bucket.databricks_data.arn,
+          "${aws_s3_bucket.databricks_data.arn}/*"
         ]
       },
       {
