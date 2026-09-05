@@ -1,0 +1,10 @@
+bundle: 
+  name: olist_ecommerce_platform
+
+include:
+  - resources/*.yml
+
+targets:
+  dev:
+    mode: development
+    default: true
