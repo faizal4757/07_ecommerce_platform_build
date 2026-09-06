@@ -1,26 +1,24 @@
+import argparse
+
 from ingestion.ingestion import ingest_to_bronze
 
-SOURCE_PATH = "s3://olist-data-platform-raw/raw/olist/"
 
-CHECKPOINT_PATH = (
-    "s3://olist-data-platform-databricks/"
-    "catalogue/checkpoints/bronze/orders/"
-)
+parser = argparse.ArgumentParser()
 
-SCHEMA_PATH = (
-    "s3://olist-data-platform-databricks/"
-    "catalogue/schemas/bronze/orders/"
-)
+parser.add_argument("--source-path", required=True)
+parser.add_argument("--checkpoint-path", required=True)
+parser.add_argument("--schema-path", required=True)
+parser.add_argument("--target-table", required=True)
 
-TARGET_TABLE = "01_ecommerce_dev.bronze.orders"
+args = parser.parse_args()
 
 
 query = ingest_to_bronze(
     spark=spark,
-    source_path=SOURCE_PATH,
-    checkpoint_path=CHECKPOINT_PATH,
-    schema_path=SCHEMA_PATH,
-    target_table=TARGET_TABLE
+    source_path=args.source_path,
+    checkpoint_path=args.checkpoint_path,
+    schema_path=args.schema_path,
+    target_table=args.target_table
 )
 
 query.awaitTermination()

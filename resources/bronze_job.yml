@@ -8,6 +8,15 @@ resources:
 
           spark_python_task:
             python_file: ../src/jobs/bronze_ingestion.py
+            parameters:
+              - "--source-path"
+              - "s3://olist-data-platform-raw/raw/olist/"
+              - "--checkpoint-path"
+              - "s3://olist-data-platform-databricks/catalogue/checkpoints/bronze/orders/"
+              - "--schema-path"
+              - "s3://olist-data-platform-databricks/catalogue/schemas/bronze/orders/"
+              - "--target-table"
+              - "01_ecommerce_dev.bronze.orders"
 
           environment_key: default
 
