@@ -4,6 +4,11 @@ bundle:
 include:
   - resources/*.yml
 
+artifacts:
+  default:
+    type: whl
+    build: python -m build
+
 targets:
   dev:
     mode: development
