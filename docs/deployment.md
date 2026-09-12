@@ -145,8 +145,6 @@ resources:
         - environment_key: default
           spec:
             environment_version: "5"
-            dependencies:
-              - ../dist/*.whl
 ```
 
 ### Job Task & Runtime Specification
@@ -157,7 +155,7 @@ resources:
 | `tasks[].task_key` | `bronze_orders` | Unique task identifier within the job graph. |
 | `spark_python_task.python_file` | `../src/jobs/bronze_ingestion.py` | Task entry point script. Relative to `resources/`. |
 | `spark_python_task.parameters` | CLI flags | Sets S3 source path, S3 checkpoint path, S3 schema tracking path, and Unity Catalog target table. |
-| `libraries` / `dependencies` | `../dist/*.whl` | Installs compiled platform wheel into the task execution environment. |
+| `libraries` | `../dist/*.whl` | Installs compiled platform wheel into the task execution environment. |
 | `environment_key` | `default` | Binds task to the configured serverless runtime environment. |
 | `spec.environment_version` | `"5"` | Databricks Serverless Environment version. |
 
