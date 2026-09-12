@@ -1,58 +1,183 @@
-# Ecommerce Data Platform
+# Olist Data Platform
 
-> A hands-on learning project that applies production-minded engineering
-> practices while building one coherent ecommerce data platform.
+An ecommerce analytics platform that ingests raw transactional data from Amazon S3, processes it through a medallion lakehouse architecture on Databricks, and produces governed datasets for analytics and business intelligence.
 
 ## Architecture
 
 ```text
-AWS S3 raw data -> Databricks Bronze -> Silver -> Gold -> Analytics / BI
+S3 (raw CSV) → Auto Loader → Bronze (Delta) → Silver (Delta) → Gold (Delta) → Analytics / BI
 ```
 
-Terraform currently manages the AWS and Databricks governance foundation.
-PySpark ingestion, Delta tables, dbt transformations, jobs, and BI are planned
-later stages.
+All data access is governed through Databricks Unity Catalog. Infrastructure is managed by Terraform.
 
-## Current status
+```mermaid
+graph LR
+    subgraph AWS
+        S3_RAW[S3: Raw Data]
+        S3_MANAGED[S3: Managed Storage]
+        IAM[IAM Role]
+    end
 
-Checkpoint 4, **Governed S3 Access**, is in progress. Terraform has created two
-protected S3 buckets, the Databricks IAM role and storage credential, and two
-Unity Catalog external locations. Unity Catalog grants and an end-to-end
-Databricks-to-S3 access validation remain before any Olist data is loaded.
+    subgraph Databricks
+        SC[Storage Credential]
+        EL[External Locations]
+        UC[Unity Catalog]
+        JOB[Ingestion Jobs]
+    end
 
-See the [project journal](docs/project.md) for the authoritative checkpoint and
-roadmap, and the [Terraform guide](docs/terraform.md) for infrastructure
-details.
+    IAM --> SC
+    SC --> EL
+    EL --> S3_RAW
+    EL --> S3_MANAGED
+    JOB --> UC
+    UC --> EL
+```
 
-## Repository layout
+## Technology Stack
+
+| Component | Technology |
+|---|---|
+| Cloud Provider | AWS (us-east-1) |
+| Data Platform | Databricks (Unity Catalog) |
+| Infrastructure | Terraform (>= 1.15.0) |
+| Data Format | Delta Lake |
+| Ingestion | PySpark Structured Streaming (Auto Loader) |
+| Packaging | Python wheel (setuptools) |
+| Deployment | Databricks Asset Bundles |
+| Compute | Databricks Serverless |
+
+## Repository Structure
 
 ```text
-terraform/       AWS and Databricks infrastructure as code
-src/             Future ingestion and processing code
-notebooks/       Exploratory and learning notebooks
-data/            Local sample data only; ignored by Git
-tests/           Automated tests
-docs/            Architecture, checkpoint journal, and operating guides
+├── AGENTS.md                    AI agent operating guide
+├── CONTRIBUTING.md              Contribution workflow and PR checklist
+├── README.md                    This file
+├── databricks.yml               Databricks Asset Bundle configuration
+├── pyproject.toml               Python package definition
+├── terraform/                   AWS and Databricks infrastructure (Terraform)
+│   ├── aws_s3.tf                S3 buckets and security
+│   ├── iam.tf                   IAM role and policy
+│   ├── databricks_storage.tf    Storage credential
+│   ├── databricks_external_location.tf   External locations
+│   ├── catalog.tf               Unity Catalog catalogs
+│   ├── schemas.tf               Medallion schemas
+│   ├── providers.tf             Provider configuration
+│   ├── variables.tf             Input variables
+│   └── versions.tf              Version constraints
+├── src/
+│   ├── ingestion/               Reusable data processing modules
+│   │   └── ingestion.py         Auto Loader bronze ingestion
+│   └── jobs/                    Databricks job entry points
+│       └── bronze_ingestion.py  Bronze ingestion job CLI
+├── resources/
+│   └── bronze_job.yml           Bronze ingestion job definition
+├── tests/                       Automated tests (placeholder)
+├── data/raw/                    Local sample data (gitignored)
+├── docs/                        Platform documentation
+│   ├── architecture.md          Platform architecture and implementation status
+│   ├── deployment.md            DAB deployment model and Python packaging
+│   ├── security.md              Security architecture and credential management
+│   └── terraform.md             Terraform resource inventory and operations
+└── notebooks/                   Exploratory notebooks (empty)
 ```
 
-## Local setup
+## Data Flow
 
-1. Put local Databricks credentials in the ignored `.env` file:
+The platform processes the **Olist Brazilian E-Commerce dataset** through a medallion architecture:
 
+| Layer | Schema | Description | Status |
+|---|---|---|---|
+| Raw | S3 `raw/olist/` | CSV source files in governed S3 location | **Planned** — local files exist, not yet uploaded |
+| Bronze | `<catalog>.bronze` | Raw Delta tables ingested via Auto Loader | **Current** — code implemented, awaiting data |
+| Silver | `<catalog>.silver` | Cleaned and conformed tables | **Planned** |
+| Gold | `<catalog>.gold` | Business-level aggregate models | **Planned** |
+
+## Environment Model
+
+| Environment | Catalog | Purpose |
+|---|---|---|
+| Development | `01_ecommerce_dev` | Active development and testing |
+| Staging | `02_ecommerce_stg` | Pre-production validation |
+| Production | `03_ecommerce_prod` | Production workloads |
+
+## Prerequisites
+
+- [Terraform](https://developer.hashicorp.com/terraform/install) >= 1.15.0
+- [Databricks CLI](https://docs.databricks.com/dev-tools/cli/install.html) with bundle support
+- Python >= 3.10
+- AWS credentials configured (via environment variables)
+- Databricks workspace credentials (via `DATABRICKS_HOST` and `DATABRICKS_TOKEN`)
+
+## Local Setup
+
+1. Clone the repository.
+2. Create a `.env` file (gitignored) with credentials:
    ```dotenv
-   DATABRICKS_HOST=https://<your-workspace-url>
-   DATABRICKS_TOKEN=<your-personal-access-token>
+   DATABRICKS_HOST=https://<workspace-url>
+   DATABRICKS_TOKEN=<personal-access-token>
+   AWS_ACCESS_KEY_ID=<key>
+   AWS_SECRET_ACCESS_KEY=<secret>
+   AWS_DEFAULT_REGION=us-east-1
    ```
+3. Load environment variables into your shell session.
 
-2. Load those variables into your shell without committing them.
-3. From `terraform/`, run `terraform init`, `terraform fmt`,
-   `terraform validate`, and `terraform plan`.
+## Validate and Deploy
 
-Do not put secrets, Terraform state, generated files, or Olist source data in
-Git.
+### Terraform
 
-## Contribution workflow
+```bash
+cd terraform
+terraform init          # Initialize providers (first time)
+terraform fmt           # Format configuration
+terraform validate      # Validate syntax and references
+terraform plan          # Preview changes
+terraform apply         # Apply (after plan review)
+```
 
-Develop each checkpoint on a focused branch, validate it, and submit it as a
-pull request. The project owner reviews and merges changes; `main` is not a
-direct development branch. See [CONTRIBUTING.md](CONTRIBUTING.md).
+### Databricks Asset Bundle
+
+```bash
+# From repository root
+databricks bundle validate          # Validate bundle configuration
+databricks bundle deploy            # Deploy to Databricks
+databricks bundle run bronze_ingestion   # Run the bronze ingestion job
+```
+
+### Python Package Build
+
+```bash
+python -m build         # Build wheel artifact in dist/
+```
+
+## Testing
+
+```bash
+pytest                  # Run tests (tests/ directory — currently empty)
+```
+
+## Security Model
+
+All data access flows through a governed chain:
+
+```text
+Databricks Job → Unity Catalog External Location → Storage Credential → IAM Role → S3
+```
+
+Key protections:
+- S3 buckets: public access blocked, AES-256 encryption, versioning enabled
+- Unity Catalog governance for all data access
+- No credentials committed to version control
+- Terraform state is local and gitignored
+
+See [docs/security.md](docs/security.md) for the full security architecture.
+
+## Documentation
+
+| Document | Purpose |
+|---|---|
+| [AGENTS.md](AGENTS.md) | AI agent operating guide and engineering contract |
+| [docs/architecture.md](docs/architecture.md) | Platform architecture, data flow, implementation status |
+| [docs/deployment.md](docs/deployment.md) | DAB deployment model, Python packaging, job definitions |
+| [docs/security.md](docs/security.md) | Security architecture, IAM, credential management |
+| [docs/terraform.md](docs/terraform.md) | Terraform resource inventory, variables, operations |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution workflow, PR checklist, validation |

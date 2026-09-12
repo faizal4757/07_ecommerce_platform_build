@@ -122,6 +122,8 @@ Documentation updates are required when:
 - Development setups, validation steps, or deployment instructions are updated.
 
 ### Documentation Targets
-- Core project architecture, technology stack, and platform status: [docs/project.md](docs/project.md)
-- Infrastructure components and deployment instructions: [docs/terraform.md](docs/terraform.md)
-- Repository overview and environment setup: [README.md](README.md)
+- Platform architecture, data flow, and implementation status: [docs/architecture.md](docs/architecture.md)
+- Infrastructure resources and Terraform operations: [docs/terraform.md](docs/terraform.md)
+- Deployment model and DAB configuration: [docs/deployment.md](docs/deployment.md)
+- Security architecture and credential management: [docs/security.md](docs/security.md)
+- Repository overview and quick-start: [README.md](README.md)
