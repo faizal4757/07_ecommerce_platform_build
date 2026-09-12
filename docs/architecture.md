@@ -48,31 +48,93 @@ graph TD
 | Data Platform | Databricks | Compute, Unity Catalog, job orchestration |
 | Infrastructure as Code | Terraform (>= 1.15.0) | AWS and Databricks resource management |
 | Data Format | Delta Lake | ACID-compliant table storage |
-| Ingestion | PySpark Structured Streaming (Auto Loader) | CSV-to-Delta bronze ingestion |
+| File-based Ingestion | PySpark Structured Streaming (Auto Loader) | S3 CSV-to-Delta bronze ingestion (current) |
+| Event-based Ingestion | PySpark Structured Streaming (Kafka) | Real-time order events to bronze (target — not yet implemented) |
 | Packaging | Python (setuptools, wheel) | Reusable code distribution |
 | Deployment | Databricks Asset Bundles (DAB) | Job definition, artifact packaging, deployment |
 | Governance | Unity Catalog | Catalog/schema/table-level access control |
 
-## Data Domain
+## Data Domain and Source Systems
 
-The platform processes the **Olist Brazilian E-Commerce dataset**, which contains:
-- Orders, order items, order payments, order reviews
-- Customers, sellers, products
-- Geolocation data
-- Product category translations
+The platform processes the **Olist Brazilian E-Commerce dataset**. Source data arrives through two ingestion paths.
 
-Raw CSV files are stored locally in `data/raw/` (gitignored). These files have not yet been uploaded to the governed S3 raw-data location.
+### System Boundary
+
+> [!IMPORTANT]
+> This repository implements the **data platform only**. It consumes data from external source systems and must not contain source-data generation or simulation logic.
+>
+> A separate **Olist Data Generator** repository will simulate upstream source systems (file drops to S3, Kafka event production). That repository can evolve independently and is not part of this codebase.
+
+### File-based Sources (S3 → Auto Loader)
+
+Historical and incremental reference/master data arrives as CSV files in the governed S3 raw bucket. These datasets are ingested by Databricks Auto Loader:
+
+| Dataset | Bronze Table | Notes |
+|---|---|---|
+| Orders (historical) | `bronze.orders` | Initial historical snapshot; new order activity arrives via Kafka (target) |
+| Customers | `bronze.customers` | Master data |
+| Products | `bronze.products` | Master data |
+| Sellers | `bronze.sellers` | Master data |
+| Order items | `bronze.order_items` | Transaction detail |
+| Order payments | `bronze.payments` | Transaction detail |
+| Order reviews | `bronze.reviews` | Transaction detail |
+| Geolocation | `bronze.geolocation` | Reference data |
+| Category translation | `bronze.category_translation` | Reference data |
+
+### Event-based Sources (Kafka → Structured Streaming) — Target
+
+> [!NOTE]
+> **Target / Future State — not yet implemented.** Kafka integration is a planned capability. No Kafka infrastructure or streaming consumer code exists in this repository today.
+
+New order activity is modelled as real-time events produced by an upstream source system to a Kafka topic. Databricks Structured Streaming will consume these events and land them in `bronze.order_events`. Silver is responsible for reconciling historical file-based order data with streaming order events into clean business entities.
+
+## Ingestion Architecture (Target)
+
+```text
+                       OLIST SOURCES
+                            │
+            ┌───────────────┴───────────────┐
+            │                               │
+        File-based                       Event-based
+            │                         (Target — not yet implemented)
+            ▼                               ▼
+           S3                             Kafka
+            │                               │
+            │                         order events
+            │                               │
+      Auto Loader                    Structured Streaming
+            │                               │
+            ▼                               ▼
+      bronze.orders              bronze.order_events [Target]
+      bronze.customers
+      bronze.products
+      bronze.sellers
+      bronze.order_items
+      bronze.payments
+      bronze.reviews
+      bronze.geolocation
+      bronze.category_translation
+            │                               │
+            └───────────────┬───────────────┘
+                            ▼
+                         SILVER
+                            │
+                            ▼
+                          GOLD
+```
 
 ## Data Flow
 
+### Current State
+
 ```text
-Source CSV files
+Source CSV files (local data/raw/ — not yet uploaded)
     ↓
-S3: olist-data-platform-raw/raw/olist/
+S3: olist-data-platform-raw/raw/olist/<dataset>/
     ↓
 Auto Loader (cloudFiles) — Spark Structured Streaming
     ↓
-Bronze Delta tables (01_ecommerce_dev.bronze.*)
+Bronze Delta tables (<catalog>.bronze.*)
     ↓ [Planned]
 Silver Delta tables (cleaned, conformed)
     ↓ [Planned]
@@ -81,9 +143,67 @@ Gold Delta tables (business models)
 Analytics / BI
 ```
 
-**Current**: Bronze ingestion code is implemented. Raw data has not yet been uploaded to S3.
+**Current**: Bronze ingestion code (Auto Loader) is implemented. Raw data has not yet been uploaded to S3.
 
-**Planned**: Silver transformations, gold business models, data quality, orchestration.
+### Target State (Kafka path — not yet implemented)
+
+```text
+Kafka topic (order events)
+    ↓
+Databricks Structured Streaming consumer
+    ↓
+bronze.order_events (Delta)
+    ↓ [Planned]
+Silver (reconcile with file-based historical data)
+```
+
+## S3 Source Layout (Target)
+
+> [!NOTE]
+> **Target source contract — not yet implemented.** This is the intended S3 prefix organization for the raw landing zone. The actual prefix structure will be established when raw data is loaded.
+
+```text
+s3://olist-data-platform-raw/
+└── raw/
+    └── olist/
+        ├── orders/
+        │   ├── historical/
+        │   └── incoming/
+        │
+        ├── customers/
+        │   ├── historical/
+        │   └── incoming/
+        │
+        ├── products/
+        │   ├── historical/
+        │   └── incoming/
+        │
+        ├── order_items/
+        │   ├── historical/
+        │   └── incoming/
+        │
+        ├── order_payments/
+        │   ├── historical/
+        │   └── incoming/
+        │
+        ├── order_reviews/
+        │   ├── historical/
+        │   └── incoming/
+        │
+        ├── sellers/
+        │   ├── historical/
+        │   └── incoming/
+        │
+        ├── geolocation/
+        │   ├── historical/
+        │   └── incoming/
+        │
+        └── category_translation/
+            ├── historical/
+            └── incoming/
+```
+
+Each dataset has a `historical/` prefix for the initial bulk load and an `incoming/` prefix for subsequent incremental arrivals. The ingestion architecture is designed to support incremental processing of incoming files.
 
 ## Environment Model
 
@@ -171,14 +291,18 @@ Terraform manages 25 resource instances across AWS and Databricks. The configura
 | External locations | **Current** | Raw and managed storage locations registered |
 | Unity Catalog catalogs | **Current** | Three environment catalogs |
 | Medallion schemas | **Current** | Bronze, silver, gold per catalog |
-| Bronze ingestion code | **Current** | Auto Loader implementation in `src/ingestion/` |
+| Bronze ingestion code (Auto Loader) | **Current** | `src/ingestion/` implements `ingest_to_bronze()` for file-based S3 data |
 | DAB job definition | **Current** | `resources/bronze_job.yml` with wheel packaging |
 | Python wheel packaging | **Current** | `pyproject.toml` with setuptools backend |
+| Raw data upload to S3 | **Planned** | Local CSV files exist in `data/raw/`; not yet uploaded |
+| S3 source prefix layout | **Planned** | Target layout defined above; not yet created |
 | Unity Catalog grants | **Planned** | Least-privilege grants not yet defined |
 | IAM policy narrowing | **Planned** | `s3:*` needs reduction to required actions |
-| Raw data upload to S3 | **Planned** | Local CSV files exist; not yet uploaded |
 | Silver transformations | **Planned** | No implementation |
 | Gold business models | **Planned** | No implementation |
+| Kafka infrastructure | **Planned** | No Kafka cluster or topic provisioned |
+| Structured Streaming (Kafka consumer) | **Planned** | No implementation; `bronze.order_events` does not exist yet |
+| Data Generator repository | **Planned** | Separate repository to simulate upstream source systems |
 | Data quality framework | **Planned** | No implementation |
 | CI/CD pipeline | **Planned** | No implementation |
 | Remote Terraform state | **Planned** | Currently local |
@@ -195,7 +319,11 @@ Terraform manages 25 resource instances across AWS and Databricks. The configura
 | Governance before ingestion | Ensures all data access patterns are governed from the start |
 | Python wheel packaging | Enables reusable code distribution to serverless Databricks jobs |
 | Thin job entry points | Separates CLI/argument handling from reusable application logic |
-| Auto Loader for ingestion | Provides incremental file processing with schema inference and exactly-once semantics |
+| Auto Loader for file-based ingestion | Provides incremental file processing with schema inference and exactly-once semantics |
+| Kafka + Structured Streaming for event-based ingestion | Decouples real-time order events from batch file arrivals; events land in `bronze.order_events` (target) |
+| `bronze.order_events` instead of merging into `bronze.orders` | Preserves the raw event structure; Silver reconciles file-based historical data with streaming events |
+| Separate Data Generator repository | Keeps source-simulation logic out of the production data platform; allows independent evolution |
+| `historical/` and `incoming/` S3 prefixes per dataset | Distinguishes initial bulk loads from incremental file arrivals within the same dataset prefix |
 
 ## Related Documentation
 

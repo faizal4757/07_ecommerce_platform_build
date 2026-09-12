@@ -273,7 +273,7 @@ Engineers extending the platform must adhere to the following conventions:
 1. Update entry point scripts in `src/jobs/` using `argparse` with explicit, long-form argument flags (e.g., `--source-path`).
 2. Ensure target table identifiers use the 3-level Unity Catalog namespace format: `<catalog>.<schema>.<table>` (e.g., `01_ecommerce_dev.bronze.orders`).
 3. S3 paths must adhere to the established storage structure:
-   - Source data: `s3://olist-data-platform-raw/raw/<domain>/`
+   - Source data: `s3://olist-data-platform-raw/raw/olist/<dataset>/` (e.g., `raw/olist/orders/`, `raw/olist/customers/`) — see [architecture.md](architecture.md) for the target `historical/` / `incoming/` prefix layout
    - Checkpoints: `s3://olist-data-platform-databricks/catalogue/checkpoints/<layer>/<entity>/`
    - Schema tracking: `s3://olist-data-platform-databricks/catalogue/schemas/<layer>/<entity>/`
 4. Verify IAM policy and storage credential alignment before updating S3 paths (see [security.md](security.md)).

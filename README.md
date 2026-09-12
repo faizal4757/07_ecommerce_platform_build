@@ -4,9 +4,9 @@ An ecommerce analytics platform that ingests raw transactional data from Amazon 
 
 ## Architecture
 
-```text
-S3 (raw CSV) → Auto Loader → Bronze (Delta) → Silver (Delta) → Gold (Delta) → Analytics / BI
-```
+**File-based (current):** `S3 → Auto Loader → Bronze (Delta) → Silver (Delta) → Gold (Delta) → Analytics / BI`
+
+**Event-based (target — not yet implemented):** `Kafka → Structured Streaming → bronze.order_events → Silver → Gold`
 
 All data access is governed through Databricks Unity Catalog. Infrastructure is managed by Terraform.
 
@@ -41,7 +41,8 @@ graph LR
 | Data Platform | Databricks (Unity Catalog) |
 | Infrastructure | Terraform (>= 1.15.0) |
 | Data Format | Delta Lake |
-| Ingestion | PySpark Structured Streaming (Auto Loader) |
+| Ingestion (file-based) | PySpark Structured Streaming (Auto Loader) |
+| Ingestion (event-based) | PySpark Structured Streaming (Kafka) |
 | Packaging | Python wheel (setuptools) |
 | Deployment | Databricks Asset Bundles |
 | Compute | Databricks Serverless |
@@ -87,9 +88,10 @@ The platform processes the **Olist Brazilian E-Commerce dataset** through a meda
 
 | Layer | Schema | Description | Status |
 |---|---|---|---|
-| Raw | S3 `raw/olist/` | CSV source files in governed S3 location | **Planned** — local files exist, not yet uploaded |
-| Bronze | `<catalog>.bronze` | Raw Delta tables ingested via Auto Loader | **Current** — code implemented, awaiting data |
-| Silver | `<catalog>.silver` | Cleaned and conformed tables | **Planned** |
+| Raw (S3 — file-based) | `s3://olist-data-platform-raw/raw/olist/<dataset>/` | CSV files per dataset; `historical/` and `incoming/` prefixes | **Planned** — target layout defined; data not yet uploaded |
+| Bronze (file-based) | `<catalog>.bronze.*` | Delta tables for orders, customers, products, sellers, order_items, payments, reviews, geolocation, category_translation — ingested via Auto Loader | **Current** — code implemented, awaiting data |
+| Bronze (event-based) | `<catalog>.bronze.order_events` | Real-time order events from Kafka via Structured Streaming | **Target** — not yet implemented |
+| Silver | `<catalog>.silver` | Cleaned, conformed, and reconciled tables | **Planned** |
 | Gold | `<catalog>.gold` | Business-level aggregate models | **Planned** |
 
 ## Environment Model
