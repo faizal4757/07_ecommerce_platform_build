@@ -4,6 +4,7 @@ resources:
       name: olist-bronze-ingestion
 
       tasks:
+
         - task_key: bronze_orders
 
           spark_python_task:
@@ -11,6 +12,8 @@ resources:
             parameters:
               - "--source-path"
               - "s3://olist-data-platform-raw/raw/olist/"
+              - "--file-pattern"
+              - "olist_orders_dataset.csv"
               - "--checkpoint-path"
               - "s3://olist-data-platform-databricks/catalogue/checkpoints/bronze/orders/"
               - "--schema-path"
@@ -19,6 +22,159 @@ resources:
               - "01_ecommerce_dev.bronze.orders"
 
           environment_key: default
+
+
+        - task_key: bronze_customers
+
+          spark_python_task:
+            python_file: ../src/jobs/bronze_ingestion.py
+            parameters:
+              - "--source-path"
+              - "s3://olist-data-platform-raw/raw/olist/"
+              - "--file-pattern"
+              - "olist_customers_dataset.csv"
+              - "--checkpoint-path"
+              - "s3://olist-data-platform-databricks/catalogue/checkpoints/bronze/customers/"
+              - "--schema-path"
+              - "s3://olist-data-platform-databricks/catalogue/schemas/bronze/customers/"
+              - "--target-table"
+              - "01_ecommerce_dev.bronze.customers"
+
+          environment_key: default
+
+
+        - task_key: bronze_products
+
+          spark_python_task:
+            python_file: ../src/jobs/bronze_ingestion.py
+            parameters:
+              - "--source-path"
+              - "s3://olist-data-platform-raw/raw/olist/"
+              - "--file-pattern"
+              - "olist_products_dataset.csv"
+              - "--checkpoint-path"
+              - "s3://olist-data-platform-databricks/catalogue/checkpoints/bronze/products/"
+              - "--schema-path"
+              - "s3://olist-data-platform-databricks/catalogue/schemas/bronze/products/"
+              - "--target-table"
+              - "01_ecommerce_dev.bronze.products"
+
+          environment_key: default
+
+
+        - task_key: bronze_order_items
+
+          spark_python_task:
+            python_file: ../src/jobs/bronze_ingestion.py
+            parameters:
+              - "--source-path"
+              - "s3://olist-data-platform-raw/raw/olist/"
+              - "--file-pattern"
+              - "olist_order_items_dataset.csv"
+              - "--checkpoint-path"
+              - "s3://olist-data-platform-databricks/catalogue/checkpoints/bronze/order_items/"
+              - "--schema-path"
+              - "s3://olist-data-platform-databricks/catalogue/schemas/bronze/order_items/"
+              - "--target-table"
+              - "01_ecommerce_dev.bronze.order_items"
+
+          environment_key: default
+
+
+        - task_key: bronze_order_payments
+
+          spark_python_task:
+            python_file: ../src/jobs/bronze_ingestion.py
+            parameters:
+              - "--source-path"
+              - "s3://olist-data-platform-raw/raw/olist/"
+              - "--file-pattern"
+              - "olist_order_payments_dataset.csv"
+              - "--checkpoint-path"
+              - "s3://olist-data-platform-databricks/catalogue/checkpoints/bronze/order_payments/"
+              - "--schema-path"
+              - "s3://olist-data-platform-databricks/catalogue/schemas/bronze/order_payments/"
+              - "--target-table"
+              - "01_ecommerce_dev.bronze.order_payments"
+
+          environment_key: default
+
+
+        - task_key: bronze_order_reviews
+
+          spark_python_task:
+            python_file: ../src/jobs/bronze_ingestion.py
+            parameters:
+              - "--source-path"
+              - "s3://olist-data-platform-raw/raw/olist/"
+              - "--file-pattern"
+              - "olist_order_reviews_dataset.csv"
+              - "--checkpoint-path"
+              - "s3://olist-data-platform-databricks/catalogue/checkpoints/bronze/order_reviews/"
+              - "--schema-path"
+              - "s3://olist-data-platform-databricks/catalogue/schemas/bronze/order_reviews/"
+              - "--target-table"
+              - "01_ecommerce_dev.bronze.order_reviews"
+
+          environment_key: default
+
+
+        - task_key: bronze_sellers
+
+          spark_python_task:
+            python_file: ../src/jobs/bronze_ingestion.py
+            parameters:
+              - "--source-path"
+              - "s3://olist-data-platform-raw/raw/olist/"
+              - "--file-pattern"
+              - "olist_sellers_dataset.csv"
+              - "--checkpoint-path"
+              - "s3://olist-data-platform-databricks/catalogue/checkpoints/bronze/sellers/"
+              - "--schema-path"
+              - "s3://olist-data-platform-databricks/catalogue/schemas/bronze/sellers/"
+              - "--target-table"
+              - "01_ecommerce_dev.bronze.sellers"
+
+          environment_key: default
+
+
+        - task_key: bronze_geolocation
+
+          spark_python_task:
+            python_file: ../src/jobs/bronze_ingestion.py
+            parameters:
+              - "--source-path"
+              - "s3://olist-data-platform-raw/raw/olist/"
+              - "--file-pattern"
+              - "olist_geolocation_dataset.csv"
+              - "--checkpoint-path"
+              - "s3://olist-data-platform-databricks/catalogue/checkpoints/bronze/geolocation/"
+              - "--schema-path"
+              - "s3://olist-data-platform-databricks/catalogue/schemas/bronze/geolocation/"
+              - "--target-table"
+              - "01_ecommerce_dev.bronze.geolocation"
+
+          environment_key: default
+
+
+        - task_key: bronze_category_translation
+
+          spark_python_task:
+            python_file: ../src/jobs/bronze_ingestion.py
+            parameters:
+              - "--source-path"
+              - "s3://olist-data-platform-raw/raw/olist/"
+              - "--file-pattern"
+              - "product_category_name_translation.csv"
+              - "--checkpoint-path"
+              - "s3://olist-data-platform-databricks/catalogue/checkpoints/bronze/category_translation/"
+              - "--schema-path"
+              - "s3://olist-data-platform-databricks/catalogue/schemas/bronze/category_translation/"
+              - "--target-table"
+              - "01_ecommerce_dev.bronze.category_translation"
+
+          environment_key: default
+
 
       environments:
         - environment_key: default
