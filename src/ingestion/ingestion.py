@@ -1,6 +1,7 @@
 def ingest_to_bronze(
     spark,
     source_path,
+    file_pattern,
     checkpoint_path,
     schema_path,
     target_table
@@ -13,6 +14,7 @@ def ingest_to_bronze(
         .option("cloudFiles.schemaLocation", schema_path)
         .option("cloudFiles.inferColumnTypes", "true")
         .option("header", "true")
+        .option("pathGlobFilter", file_pattern)
         .load(source_path)
     )
 
