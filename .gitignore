@@ -3,12 +3,38 @@
 /project_content/
 /secrets/
 
-
 /data/
+
+# Python build artifacts and package metadata.
+/build/
+/dist/
+*.egg-info/
+*.egg
+*.whl
+
+# Python caches and test/tool output.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Databricks CLI local deployment state.
+.databricks/
 
 # Terraform local working files and state (never commit credentials or state).
 **/.terraform/*
 *.tfstate
 *.tfstate.*
+*.tfvars
+*.tfvars.json
+*.tfplan
 crash.log
 crash.*.log
+
+# Operating-system files.
+.DS_Store
+Thumbs.db
