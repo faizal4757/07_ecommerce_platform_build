@@ -1,0 +1,196 @@
+{
+    "Objects": [
+        {
+            "Key": "raw/",
+            "VersionId": "qj3m150mKJSLeyLAf30Af6ybUBvh23W8"
+        },
+        {
+            "Key": "raw/",
+            "VersionId": "GnUXjCAJjJaegMvVoGgtgvcupcsb1Rrg"
+        },
+        {
+            "Key": "raw/",
+            "VersionId": "RHVOY7adsqpD6_wq5aEVdaFveQKb9s19"
+        },
+        {
+            "Key": "raw/olist/category_translation/historical/product_category_name_translation.csv",
+            "VersionId": "s.Vy4Pp5JDm7TV_o_e5Xmz5ROjZ9gahN"
+        },
+        {
+            "Key": "raw/olist/customers/historical/olist_customers_dataset.csv",
+            "VersionId": "uVBH4Dz.uXF7IqSyFU20f6CBhfV9Jacz"
+        },
+        {
+            "Key": "raw/olist/geolocation/historical/olist_geolocation_dataset.csv",
+            "VersionId": "QXU9fPnNRyOJVMgNxo_zIJ2wC4ZEpZxx"
+        },
+        {
+            "Key": "raw/olist/olist_customers_dataset.csv",
+            "VersionId": "cMPV05QEUkW5sqFFKs14pgqMQgAD.bay"
+        },
+        {
+            "Key": "raw/olist/olist_geolocation_dataset.csv",
+            "VersionId": "Vd6Qf1sgC7Mt.m3eeaJn1787ZW5zwLuU"
+        },
+        {
+            "Key": "raw/olist/olist_order_items_dataset.csv",
+            "VersionId": "S6VOsocy3Qx2UUuHVOvw.Z2FCunoG012"
+        },
+        {
+            "Key": "raw/olist/olist_order_payments_dataset.csv",
+            "VersionId": "YAFGq3AZlb7jiq1BA5rA6R5izTq4KX0y"
+        },
+        {
+            "Key": "raw/olist/olist_order_reviews_dataset.csv",
+            "VersionId": "ZsYgo9XJoCTAk6R5qk6A8r5.7hWm1cKg"
+        },
+        {
+            "Key": "raw/olist/olist_orders_dataset.csv",
+            "VersionId": "Ltz0XRi0SXFAlovJvT4PPoxQEJmUW6oX"
+        },
+        {
+            "Key": "raw/olist/olist_products_dataset.csv",
+            "VersionId": "WzFUuU34p0qlBoA6xDsYW.bZC7tjv_9K"
+        },
+        {
+            "Key": "raw/olist/olist_sellers_dataset.csv",
+            "VersionId": "6sNrvJAvbVeCQGRUOQtQzapqZeluyVzW"
+        },
+        {
+            "Key": "raw/olist/order_items/historical/olist_order_items_dataset.csv",
+            "VersionId": "sn8X9c2MMTls6EIqyGTS3qgC7U9PkESk"
+        },
+        {
+            "Key": "raw/olist/order_payments/historical/olist_order_payments_dataset.csv",
+            "VersionId": "RbXHCOSdyd4J8mEjNP.5KEEBcIKxohXS"
+        },
+        {
+            "Key": "raw/olist/order_reviews/historical/olist_order_reviews_dataset.csv",
+            "VersionId": "UdDk1J0aWLEmWoxtAggQMBd6WKUtyTzf"
+        },
+        {
+            "Key": "raw/olist/orders/historical/olist_orders_dataset.csv",
+            "VersionId": "V5E9KyrhiKVxgrLoM_AI2PyZ8kYiJiZb"
+        },
+        {
+            "Key": "raw/olist/product_category_name_translation.csv",
+            "VersionId": "o5h4tbnNs3MmPrTKoCC25d3Roo0BkNSq"
+        },
+        {
+            "Key": "raw/olist/products/historical/olist_products_dataset.csv",
+            "VersionId": "qYAeAA4YfCzNJVq8FAbrglj9SOqbQCHd"
+        },
+        {
+            "Key": "raw/olist/sellers/historical/olist_sellers_dataset.csv",
+            "VersionId": "bXEXcAqVkihzSyGRF3Sp3vv3Iw1kJLcS"
+        },
+        {
+            "Key": "raw/validate_credential_2026-08-29-13-01-59",
+            "VersionId": "p7Q3B2oalca4FWJ50h6fSIN.I6AaKGF1"
+        },
+        {
+            "Key": "raw/validate_credential_2026-08-29-13-05-24",
+            "VersionId": "O56y90Zv_mYKPyO.tzoyM06CkxL0SFy4"
+        },
+        {
+            "Key": "raw/validate_credential_2026-08-29-13-16-41",
+            "VersionId": "HXYwfqid_1oesYb7j3X0fFhxOhubl3_M"
+        },
+        {
+            "Key": "raw/",
+            "VersionId": "Ck346f4HSHeREnp2yAPOWsY03W6Csapo"
+        },
+        {
+            "Key": "raw/",
+            "VersionId": "oQcqdNiud85QN1C6QK2rffquAWcfRnyn"
+        },
+        {
+            "Key": "raw/",
+            "VersionId": "ovn2WiNb.vVrUgVt7i6syvtM5PoRRtuM"
+        },
+        {
+            "Key": "raw/olist/category_translation/historical/product_category_name_translation.csv",
+            "VersionId": "kFCb2xjjznLGj.qeHIDqtwDY8x6Ix1.e"
+        },
+        {
+            "Key": "raw/olist/customers/historical/olist_customers_dataset.csv",
+            "VersionId": "7lxLXf7H_ftOEVo8uqZglbLUbXcR7N14"
+        },
+        {
+            "Key": "raw/olist/geolocation/historical/olist_geolocation_dataset.csv",
+            "VersionId": "_QYJVR8BzYxvrbv_rL6lBry5MIpAdCzp"
+        },
+        {
+            "Key": "raw/olist/olist_customers_dataset.csv",
+            "VersionId": "uMJTn92QJbUSROMuo9QP1PlScbd0yIT5"
+        },
+        {
+            "Key": "raw/olist/olist_geolocation_dataset.csv",
+            "VersionId": "WMbK5J5kvs8bXZkBtMlEIClGLE91R5x7"
+        },
+        {
+            "Key": "raw/olist/olist_order_items_dataset.csv",
+            "VersionId": "S0Igux.o_s8lX9yczkEkCrHjHWxiq2TP"
+        },
+        {
+            "Key": "raw/olist/olist_order_payments_dataset.csv",
+            "VersionId": "paWoqWttzcXAt2Vi_n9myjmDW6rl5UT9"
+        },
+        {
+            "Key": "raw/olist/olist_order_reviews_dataset.csv",
+            "VersionId": "cos3fSaT2tZO68PSVDs6W2yQF6sNm0V2"
+        },
+        {
+            "Key": "raw/olist/olist_orders_dataset.csv",
+            "VersionId": "wL1tLo.Ur4ckkgVG..duI23neF_u0.PS"
+        },
+        {
+            "Key": "raw/olist/olist_products_dataset.csv",
+            "VersionId": "XnBG1VKm17PiFpKJMKY0aRty8znGiuWR"
+        },
+        {
+            "Key": "raw/olist/olist_sellers_dataset.csv",
+            "VersionId": ".CFWrtHn1OHJ62u0Q5uHRMPbazMkCDJb"
+        },
+        {
+            "Key": "raw/olist/order_items/historical/olist_order_items_dataset.csv",
+            "VersionId": "cZdglUYMv2zS4yHckSl18YoKi.1gp7Fh"
+        },
+        {
+            "Key": "raw/olist/order_payments/historical/olist_order_payments_dataset.csv",
+            "VersionId": "WjeItUhki9UlAdLC6O6tRNm2jCuCX9OO"
+        },
+        {
+            "Key": "raw/olist/order_reviews/historical/olist_order_reviews_dataset.csv",
+            "VersionId": "YtuRKbMspMWS2PV1zbUYGyNeS9Y1ogdX"
+        },
+        {
+            "Key": "raw/olist/orders/historical/olist_orders_dataset.csv",
+            "VersionId": ".xBKJnNu19m4MJaZKWG2sUCR89tVv4XW"
+        },
+        {
+            "Key": "raw/olist/product_category_name_translation.csv",
+            "VersionId": "E1Ry4mhyOEC3xCNLfCl_yCaHyvL18Rsz"
+        },
+        {
+            "Key": "raw/olist/products/historical/olist_products_dataset.csv",
+            "VersionId": "3TTQQ0NnNXOoKZ88TDlBPogxMLeWg8et"
+        },
+        {
+            "Key": "raw/olist/sellers/historical/olist_sellers_dataset.csv",
+            "VersionId": "2YbVYq5h6MhwsCgvwhGceHvQWVvvgPAP"
+        },
+        {
+            "Key": "raw/validate_credential_2026-08-29-13-01-59",
+            "VersionId": "2LGjbCs9lx0Rd.yF72tymXT_jcPnmUWa"
+        },
+        {
+            "Key": "raw/validate_credential_2026-08-29-13-05-24",
+            "VersionId": "VSdUbUz9RKJO6T9S6G3PwJ7.PjTqQ5KB"
+        },
+        {
+            "Key": "raw/validate_credential_2026-08-29-13-16-41",
+            "VersionId": "7Ic6nNmUDHqm_lXjR9rHXd5OcxHM0g5H"
+        }
+    ]
+}

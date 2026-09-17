@@ -2,7 +2,9 @@
 # local, ignored DATABRICKS_HOST and DATABRICKS_TOKEN environment variables.
 # Do not add credentials to this file.
 
-provider "databricks" {}
+provider "databricks" {
+  auth_type = "pat"
+}
 
 provider "aws" {
   region = "us-east-1"
