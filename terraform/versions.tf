@@ -11,5 +11,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.0"
     }
+
+    airbyte = {
+      source  = "airbytehq/airbyte"
+      version = "~> 1.3"
+    }
   }
 }
