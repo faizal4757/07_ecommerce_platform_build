@@ -7,7 +7,8 @@ include:
 artifacts:
   default:
     type: whl
-    build: python -m build
+    build: pip wheel src/ -w dist/ --no-deps
+    path: dist/
 
 targets:
   dev:
