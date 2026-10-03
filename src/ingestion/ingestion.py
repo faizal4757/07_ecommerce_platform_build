@@ -1,20 +1,15 @@
 def ingest_to_bronze(
     spark,
     source_path,
-    file_pattern,
     checkpoint_path,
     schema_path,
     target_table
 ):
-
     stream = (
         spark.readStream
         .format("cloudFiles")
-        .option("cloudFiles.format", "csv")
+        .option("cloudFiles.format", "parquet")
         .option("cloudFiles.schemaLocation", schema_path)
-        .option("cloudFiles.inferColumnTypes", "true")
-        .option("header", "true")
-        .option("pathGlobFilter", file_pattern)
         .load(source_path)
     )
 
