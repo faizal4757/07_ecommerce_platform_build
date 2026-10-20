@@ -1,10 +1,18 @@
+
 resources:
   jobs:
     bronze_ingestion:
       name: olist-bronze-ingestion
 
       tasks:
+        - task_key: create_bronze_schema
+          spark_python_task:
+            python_file: ../src/jobs/setup_bronze_schema.py
+          environment_key: default
+
         - task_key: bronze_orders
+          depends_on:
+            - task_key: create_bronze_schema
           spark_python_task:
             python_file: ../src/jobs/bronze_ingestion.py
             parameters:
@@ -19,6 +27,8 @@ resources:
           environment_key: default
 
         - task_key: bronze_customers
+          depends_on:
+            - task_key: create_bronze_schema
           spark_python_task:
             python_file: ../src/jobs/bronze_ingestion.py
             parameters:
@@ -33,6 +43,8 @@ resources:
           environment_key: default
 
         - task_key: bronze_products
+          depends_on:
+            - task_key: create_bronze_schema
           spark_python_task:
             python_file: ../src/jobs/bronze_ingestion.py
             parameters:
@@ -47,6 +59,8 @@ resources:
           environment_key: default
 
         - task_key: bronze_order_items
+          depends_on:
+            - task_key: create_bronze_schema
           spark_python_task:
             python_file: ../src/jobs/bronze_ingestion.py
             parameters:
@@ -61,6 +75,8 @@ resources:
           environment_key: default
 
         - task_key: bronze_order_payments
+          depends_on:
+            - task_key: create_bronze_schema
           spark_python_task:
             python_file: ../src/jobs/bronze_ingestion.py
             parameters:
@@ -75,6 +91,8 @@ resources:
           environment_key: default
 
         - task_key: bronze_order_reviews
+          depends_on:
+            - task_key: create_bronze_schema
           spark_python_task:
             python_file: ../src/jobs/bronze_ingestion.py
             parameters:
@@ -89,6 +107,8 @@ resources:
           environment_key: default
 
         - task_key: bronze_sellers
+          depends_on:
+            - task_key: create_bronze_schema
           spark_python_task:
             python_file: ../src/jobs/bronze_ingestion.py
             parameters:
@@ -103,6 +123,8 @@ resources:
           environment_key: default
 
         - task_key: bronze_geolocation
+          depends_on:
+            - task_key: create_bronze_schema
           spark_python_task:
             python_file: ../src/jobs/bronze_ingestion.py
             parameters:
@@ -117,6 +139,8 @@ resources:
           environment_key: default
 
         - task_key: bronze_category_translation
+          depends_on:
+            - task_key: create_bronze_schema
           spark_python_task:
             python_file: ../src/jobs/bronze_ingestion.py
             parameters:
