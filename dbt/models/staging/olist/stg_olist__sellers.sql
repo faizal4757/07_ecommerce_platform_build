@@ -6,8 +6,8 @@ with source as (
 )
 
 select
-    seller_id,
-    seller_zip_code_prefix,
-    seller_city,
-    seller_state
+    cast(seller_id as string) as seller_id,
+    cast(seller_zip_code_prefix as string) as seller_zip_code_prefix,
+    trim(cast(seller_city as string)) as seller_city,
+    upper(trim(cast(seller_state as string))) as seller_state
 from source
