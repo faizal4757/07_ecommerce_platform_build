@@ -6,6 +6,6 @@ with source as (
 )
 
 select
-    product_category_name,
-    product_category_name_english
+    trim(cast(product_category_name as string)) as product_category_name,
+    trim(cast(product_category_name_english as string)) as product_category_name_english
 from source
