@@ -1,5 +1,6 @@
 .env
 .venv/
+.venv-dbt/
 /project_content/
 /secrets/
 
