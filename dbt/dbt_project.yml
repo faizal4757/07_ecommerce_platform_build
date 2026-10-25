@@ -16,13 +16,12 @@ clean-targets:
   - dbt_packages
 
 vars:
-  # Development is deliberately the only configured runtime target in the first milestone.
   source_catalog: "01_ecommerce_dev"
 
 models:
   olist_ecommerce_dbt:
     staging:
-      +schema: bronze
+      +schema: dbt_staging
       +materialized: view
       +tags: ["staging"]
     intermediate:
