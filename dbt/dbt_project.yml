@@ -1,0 +1,37 @@
+name: olist_ecommerce_dbt
+version: "1.0.0"
+config-version: 2
+
+profile: olist_ecommerce_dbt
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - target
+  - dbt_packages
+
+vars:
+  # Development is deliberately the only configured runtime target in the first milestone.
+  source_catalog: "01_ecommerce_dev"
+
+models:
+  olist_ecommerce_dbt:
+    staging:
+      +schema: bronze
+      +materialized: view
+      +tags: ["staging"]
+    intermediate:
+      +schema: silver
+      +materialized: table
+      +tags: ["intermediate"]
+    marts:
+      +schema: gold
+      +materialized: table
+      +contract:
+        enforced: true
+      +tags: ["marts"]
