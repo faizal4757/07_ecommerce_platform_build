@@ -1,4 +1,0 @@
-# Generated and verified package resolution will replace this file after running:
-# dbt deps --project-dir .\dbt
-# Commit the adapter-resolved dependency lock file from that command.
-# This file is intentionally not represented as a generated lock; use package-lock.yml from dbt deps.
