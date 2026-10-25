@@ -4,7 +4,7 @@ olist_ecommerce_dbt:
     dev:
       type: databricks
       catalog: 01_ecommerce_dev
-      schema: dbt_dev
+      schema: dbt_staging
       host: "{{ env_var('DATABRICKS_HOST') }}"
       http_path: "{{ env_var('DBT_DATABRICKS_HTTP_PATH') }}"
       token: "{{ env_var('DATABRICKS_TOKEN') }}"
