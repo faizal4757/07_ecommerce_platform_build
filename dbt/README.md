@@ -11,42 +11,40 @@ This pair is from the August 2026 dbt v1 compatible release track. Keep the dbt 
 
 ## Local Windows setup
 
-From the repository root, create a dedicated virtual environment and install the pinned tooling:
+Use the existing `.venv-dbt` environment (Python 3.14.7) and pinned dbt packages. Keep it separate from the ingestion environment:
 
 ```powershell
-py -3.11 -m venv .venv-dbt
 .\.venv-dbt\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install -r .\dbt\requirements-dbt.txt
 dbt --version
 ```
 
-Copy the example profile to the standard dbt profile directory. Do not put the token in the repository:
+Keep the local profile in the ignored dbt project directory:
 
 ```powershell
-New-Item -ItemType Directory -Force "$HOME\.dbt" | Out-Null
-Copy-Item .\dbt\profiles.example.yml "$HOME\.dbt\profiles.yml"
+Copy-Item .\dbt\profiles.example.yml .\dbt\profiles.yml
 ```
 
-Set workspace credentials in the current PowerShell session. Obtain the workspace host from your Databricks profile and the HTTP Path from the SQL Warehouse connection details. Do not print or commit tokens.
+Authenticate the Databricks CLI with OAuth once (`databricks auth login --host <workspace-url> --profile dev`) if needed. Set connection values for the current PowerShell session. The CLI command below places its short-lived OAuth access token directly into the environment; do not print or commit it.
 
 ```powershell
-$env:DATABRICKS_HOST = "https://<workspace-host>"
-$env:DATABRICKS_TOKEN = "<short-lived-personal-token>"
+$env:DBT_DATABRICKS_HOST = (databricks auth describe --profile dev -o json | ConvertFrom-Json).details.host
 $env:DBT_DATABRICKS_HTTP_PATH = "/sql/1.0/warehouses/<warehouse-id>"
+$env:DATABRICKS_TOKEN = (databricks auth token dev -o json | ConvertFrom-Json).access_token
 ```
 
-The values in angle brackets above must be replaced locally. For team CI/prod, use a service principal with OAuth and least-privilege Unity Catalog grants rather than a human PAT.
+Replace the HTTP Path placeholder with the value from the Databricks SQL Warehouse connection details. For team CI/prod, use a service principal with OAuth and least-privilege Unity Catalog grants.
+
+The configured SQL warehouse must be running for `dbt debug` and SQL queries. `dbt parse` is offline and does not create relations.
 
 ## Resolve and verify packages
 
 ```powershell
-dbt deps --project-dir .\dbt
-dbt debug --project-dir .\dbt --target dev
-dbt parse --project-dir .\dbt --target dev
+dbt deps --project-dir .\dbt --profiles-dir .\dbt
+dbt debug --project-dir .\dbt --profiles-dir .\dbt --target dev
+dbt parse --project-dir .\dbt --profiles-dir .\dbt --target dev
 ```
 
-Commit the generated `dbt/package-lock.yml` after successful dependency resolution.
+Review and commit `dbt/package-lock.yml` when dependency versions change.
 
 ## Current scope and data contract
 
@@ -54,7 +52,7 @@ Commit the generated `dbt/package-lock.yml` after successful dependency resoluti
 - `models/intermediate`: conformed Silver tables.
 - `models/marts`: contracted Gold models.
 
-Source declarations point to `01_ecommerce_dev.bronze`. The initial project targets `dbt_dev` for model output, so it does not write into the existing Bronze schema. The development identity needs `USE CATALOG`, `USE SCHEMA`, source `SELECT`, and target `CREATE VIEW`/ `CREATE TABLE` grants as applicable.
+Source declarations point to `01_ecommerce_dev.bronze`. Development models target `01_ecommerce_dev.dbt_staging`, `01_ecommerce_dev.silver`, and `01_ecommerce_dev.gold`; the custom schema macro uses those names directly, avoiding dbt's default target-schema prefixing. These output schemas must remain separate from `bronze`. The development identity needs `USE CATALOG`, `USE SCHEMA`, source `SELECT`, and target `CREATE VIEW`/`CREATE TABLE` grants as applicable.
 
 Source freshness is not configured until a reliable ingestion timestamp is verified in the table schema. Business timestamps, such as order purchase time, are not ingestion timestamps.
 
