@@ -1,0 +1,6 @@
+# Local dbt profile contains credentials and must never be committed.
+profiles.yml
+target/
+dbt_packages/
+logs/
+.partial_parse.msgpack

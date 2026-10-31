@@ -1,0 +1,47 @@
+name: olist_ecommerce_dbt
+version: "1.0.0"
+config-version: 2
+
+# Refuse to run on a dbt version this project hasn't been tested with.
+require-dbt-version: [">=1.12.0", "<1.13.0"]
+
+profile: olist_ecommerce_dbt
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - target
+  - dbt_packages
+
+vars:
+  # Defaults to dev; set DBT_SOURCE_CATALOG for any other environment.
+  source_catalog: "{{ env_var('DBT_SOURCE_CATALOG', '01_ecommerce_dev') }}"
+
+models:
+  olist_ecommerce_dbt:
+    # Push model and column descriptions into Unity Catalog.
+    +persist_docs:
+      relation: true
+      columns: true
+
+    staging:
+      +schema: dbt_staging
+      +materialized: view
+      +tags: ["staging"]
+
+    intermediate:
+      +schema: silver
+      +materialized: table
+      +tags: ["intermediate"]
+
+    marts:
+      +schema: gold
+      +materialized: table
+      +contract:
+        enforced: true
+      +tags: ["marts"]
