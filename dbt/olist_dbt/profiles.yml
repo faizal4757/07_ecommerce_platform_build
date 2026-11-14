@@ -1,0 +1,12 @@
+olist_dbt:
+  target: dev
+
+  outputs:
+    dev:
+      type: databricks
+      host: dbc-bd8a9261-1cd1.cloud.databricks.com
+      http_path: /sql/1.0/warehouses/992cbc778577904e
+      catalog: 01_ecommerce_dev
+      schema: silver
+      auth_type: oauth
+      threads: 4

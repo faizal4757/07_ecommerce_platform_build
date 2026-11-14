@@ -1,0 +1,57 @@
+{
+    "path_count": 211,
+    "parsed_path_count": 211,
+    "static_analysis_path_count": 1,
+    "static_analysis_parsed_path_count": 1,
+    "is_partial_parse_enabled": true,
+    "is_static_analysis_enabled": true,
+    "read_files_elapsed": 0.044224799999938114,
+    "load_macros_elapsed": 1.0147649000000456,
+    "parse_project_elapsed": 0.28058150000015303,
+    "patch_sources_elapsed": 0.021239900000182388,
+    "process_manifest_elapsed": 0.03929260000040813,
+    "load_all_elapsed": 1.5511172999995324,
+    "projects": [
+        {
+            "project_name": "olist_dbt",
+            "elapsed": 0.27710710000064864,
+            "parsers": [
+                {
+                    "parser": "model",
+                    "elapsed": 0.19203209999977844,
+                    "parsed_path_count": 1
+                },
+                {
+                    "parser": "test",
+                    "elapsed": 0.08386849999988044,
+                    "parsed_path_count": 1
+                }
+            ],
+            "parsed_path_count": 2
+        },
+        {
+            "project_name": "dbt_databricks",
+            "elapsed": 0.0009663999999247608,
+            "parsers": [],
+            "parsed_path_count": 0
+        },
+        {
+            "project_name": "dbt_spark",
+            "elapsed": 0.0013557999991462566,
+            "parsers": [],
+            "parsed_path_count": 0
+        },
+        {
+            "project_name": "dbt",
+            "elapsed": 0.0010297999997419538,
+            "parsers": [
+                {
+                    "parser": "doc",
+                    "elapsed": 0.00017279999974562088,
+                    "parsed_path_count": 1
+                }
+            ],
+            "parsed_path_count": 1
+        }
+    ]
+}

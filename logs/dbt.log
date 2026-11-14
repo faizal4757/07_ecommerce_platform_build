@@ -70,3 +70,22 @@ https://docs.getdbt.com/docs/configure-your-profile
 [0m22:23:44.315644 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002A84D142D70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002A84D123770>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002A84D1F19D0>]}
 [0m22:23:44.315952 [debug] [MainThread]: Flushing usage events
 [0m22:23:45.493201 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m15:13:46.940842 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001C28A868050>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001C287EE3610>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001C28CE83C50>]}
+
+
+============================== 15:13:46.949386 | f4d0afa7-8d4b-47f6-adef-0ebd3b7e2043 ==============================
+[0m15:13:46.949386 [info ] [MainThread]: Running with dbt=1.12.6
+[0m15:13:46.950575 [debug] [MainThread]: running dbt with arguments {'static_parser': 'True', 'no_print': 'None', 'maximum_seed_size_mib': '1', 'target_path': 'None', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'version_check': 'True', 'printer_width': '80', 'write_json': 'True', 'introspect': 'True', 'log_cache_events': 'False', 'empty': 'None', 'cache_selected_only': 'False', 'fail_fast': 'False', 'debug': 'False', 'log_format': 'default', 'partial_parse': 'True', 'send_anonymous_usage_stats': 'True', 'quiet': 'False', 'warn_error': 'None', 'profiles_dir': 'C:\\Users\\user\\.dbt', 'invocation_command': 'dbt init olist_dbt', 'hints_enabled': 'True', 'use_colors': 'True', 'use_experimental_parser': 'False', 'indirect_selection': 'eager', 'log_path': 'logs'}
+[0m15:13:46.991638 [debug] [MainThread]: Starter project path: C:\Users\user\AppData\Roaming\Python\Python314\site-packages\dbt\include\starter_project
+[0m15:13:47.029769 [info ] [MainThread]: Setting up your profile.
+[0m17:27:49.135450 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000018B7A668050>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000018B77CC3610>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000018B7CC83C50>]}
+
+
+============================== 17:27:49.147023 | 6514b1f1-0695-43ac-8e10-dd89d3c54815 ==============================
+[0m17:27:49.147023 [info ] [MainThread]: Running with dbt=1.12.6
+[0m17:27:49.148493 [debug] [MainThread]: running dbt with arguments {'maximum_seed_size_mib': '1', 'no_print': 'None', 'static_parser': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'target_path': 'None', 'version_check': 'True', 'printer_width': '80', 'write_json': 'True', 'empty': 'None', 'log_cache_events': 'False', 'introspect': 'True', 'cache_selected_only': 'False', 'log_format': 'default', 'debug': 'False', 'fail_fast': 'False', 'profiles_dir': 'C:\\Users\\user\\.dbt', 'send_anonymous_usage_stats': 'True', 'quiet': 'False', 'warn_error': 'None', 'partial_parse': 'True', 'use_colors': 'True', 'hints_enabled': 'True', 'invocation_command': 'dbt init olist_dbt', 'use_experimental_parser': 'False', 'indirect_selection': 'eager', 'log_path': 'logs'}
+[0m17:27:49.230345 [info ] [MainThread]: A project called olist_dbt already exists here.
+[0m17:27:49.231969 [debug] [MainThread]: Command `dbt init` succeeded at 17:27:49.231751 after 0.89 seconds
+[0m17:27:49.232815 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000018B7CAAE060>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000018B7CCB57F0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000018B7CCC1370>]}
+[0m17:27:49.233677 [debug] [MainThread]: Flushing usage events
+[0m17:27:50.374839 [debug] [MainThread]: An error was encountered while trying to flush usage events
