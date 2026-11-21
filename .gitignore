@@ -3,7 +3,7 @@
 .venv-dbt/
 /project_content/
 /secrets/
-
+dbt/profiles.yml
 /data/
 
 # Python build artifacts and package metadata.
@@ -39,3 +39,7 @@ crash.*.log
 # Operating-system files.
 .DS_Store
 Thumbs.db
+# dbt generated files and directories
+**/dbt_packages/
+**/target/
+**/logs/
