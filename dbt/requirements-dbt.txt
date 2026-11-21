@@ -1,4 +1,0 @@
-# Tested compatible version pair from the dbt 1.12 compatible track, August 2026.
-# Keep this environment separate from the ingestion wheel requirements.
-dbt-core==1.12.0
-dbt-databricks==1.12.4
