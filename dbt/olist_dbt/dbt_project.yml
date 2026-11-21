@@ -20,7 +20,7 @@ models:
     olist:
       staging:
         +materialized: view
-      silver:
-        +materialized: table
-      gold:
+      intermediate:
+        +materialized: view
+      marts:
         +materialized: table
